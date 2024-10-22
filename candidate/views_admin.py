@@ -5170,6 +5170,7 @@ def candidate_duplicates_list_view(request):
         'google_civic_election_id':     google_civic_election_id,
         'duplicates_list':              duplicates_list_modified,
         'candidate_search':             candidate_search,
+        'possible_duplicates_count':    possible_duplicates_count,
         'show_all':                     show_all,
         'show_candidates_with_email':   show_candidates_with_email,
         'show_related_candidates':      show_related_candidates,

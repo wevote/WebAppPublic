@@ -1,13 +1,13 @@
 {# templates/candidate/candidate_duplicates_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Duplicate Candidates{% endblock %}
+{% block title %}Duplicate Candidates{% if state_code %} - {{ state_code|upper }}{% endif %}{% if possible_duplicates_count %} - {{ possible_duplicates_count }} Found{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
 
-<h1>Duplicate Candidates</h1>
+<h1>Duplicate Candidates{% if state_code %} - {{ state_code|upper }}{% endif %}{% if possible_duplicates_count %} - {{ possible_duplicates_count }}{% endif %}</h1>
 
     <ul>
     {% if state_code %}
