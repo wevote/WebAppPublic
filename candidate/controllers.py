@@ -666,16 +666,43 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     elif positive_value_exists(candidate1_on_stage.ctcl_uuid) and \
             positive_value_exists(candidate2_on_stage.ctcl_uuid):
         candidate_names_match = False
+        candidate_name_matches_alt_name = False
         each_candidate_has_different_politician = False
         if positive_value_exists(candidate1_on_stage.candidate_name) and \
                 positive_value_exists(candidate2_on_stage.candidate_name):
             if candidate1_on_stage.candidate_name.strip().lower() == candidate2_on_stage.candidate_name.strip().lower():
                 candidate_names_match = True
+            # Does either primary name match any of the alternate names of the other?
+            candidate1_alt_names_list = []
+            if positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
+                if candidate1_on_stage.google_civic_candidate_name.strip().lower() not in candidate1_alt_names_list:
+                    candidate1_alt_names_list.append(candidate1_on_stage.google_civic_candidate_name.strip().lower())
+            if positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
+                if candidate1_on_stage.google_civic_candidate_name2.strip().lower() not in candidate1_alt_names_list:
+                    candidate1_alt_names_list.append(candidate1_on_stage.google_civic_candidate_name2.strip().lower())
+            if positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
+                if candidate1_on_stage.google_civic_candidate_name3.strip().lower() not in candidate1_alt_names_list:
+                    candidate1_alt_names_list.append(candidate1_on_stage.google_civic_candidate_name3.strip().lower())
+            candidate2_alt_names_list = []
+            if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
+                if candidate2_on_stage.google_civic_candidate_name.strip().lower() not in candidate2_alt_names_list:
+                    candidate2_alt_names_list.append(candidate2_on_stage.google_civic_candidate_name.strip().lower())
+            if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
+                if candidate2_on_stage.google_civic_candidate_name2.strip().lower() not in candidate2_alt_names_list:
+                    candidate2_alt_names_list.append(candidate2_on_stage.google_civic_candidate_name2.strip().lower())
+            if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
+                if candidate2_on_stage.google_civic_candidate_name3.strip().lower() not in candidate2_alt_names_list:
+                    candidate2_alt_names_list.append(candidate2_on_stage.google_civic_candidate_name3.strip().lower())
+            if candidate1_on_stage.candidate_name.strip().lower() in candidate2_alt_names_list:
+                candidate_name_matches_alt_name = True
+            if candidate2_on_stage.candidate_name.strip().lower() in candidate1_alt_names_list:
+                candidate_name_matches_alt_name = True
+        # Make sure they don't have different politicians
         if positive_value_exists(candidate1_on_stage.politician_we_vote_id) and \
                 positive_value_exists(candidate2_on_stage.politician_we_vote_id):
             if candidate1_on_stage.politician_we_vote_id != candidate2_on_stage.politician_we_vote_id:
                 each_candidate_has_different_politician = True
-        if candidate_names_match and not each_candidate_has_different_politician:
+        if (candidate_names_match or candidate_name_matches_alt_name) and not each_candidate_has_different_politician:
             status += "IDENTICAL_CANDIDATE_NAMES_FROM_CTCL_FOUND_FOR_MERGE "
             merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, merge_choices)
             if merge_results['candidates_merged']:
