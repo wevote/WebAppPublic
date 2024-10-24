@@ -2,7 +2,7 @@
 
 <body>
 <div class="alert alert-info" role="alert" id="SpeedStatisticsPopup"
-     style="display: flex; justify-content: space-between; align-items: center; position: relative; width: 100%; text-align: center; padding: 15px;">
+     style="display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; text-align: center; padding: 15px;">
     <span class="close" style="position: absolute;
                                top: 2px;
                                right: 2px;">&times;
@@ -15,21 +15,25 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Description</th>
                 <th>Time Difference (seconds)</th>
+                <th>Description</th>
             </tr>
         </thead>
         <tbody>
             {% for view, stats in performance_dict.items %}
                 <tr>
-                    <td colspan="3" style="font-weight: bold;">View: {{ view }}</td>
+                    <td colspan="3" style="font-weight: bold; text-align: left">View: {{ view }}</td>
                 </tr>
                 {% for stat in stats %}
                     <tr>
                         {% if stat.name %}
                             <td>{{ stat.name }}</td>
-                            <td>{{ stat.description }}</td>
-                            <td>{{ stat.time_difference }}</td>
+                            <td>{{ stat.time_difference|floatformat:4 }}</td>
+                            <td style="
+                                font-weight: 300;
+                                color: #666;">
+                                {{ stat.description }}
+                            </td>
                         {% else %}
                             <td colspan="3">{{ stat }}</td>
                         {% endif %}
@@ -46,10 +50,13 @@
     Speed Statistics
 </button>
 <script>
+    // Handle showing the Speed Statistics table on button click
     document.querySelector('.toggle_button').addEventListener('click', function() {
-        document.getElementById('SpeedStatisticsPopup').style.display = 'block';
+        document.getElementById('SpeedStatisticsPopup').style.display = 'flex';
         document.getElementById('SpeedStatisticsButton').style.display = 'none';
     });
+
+    // Handle hiding the Speed Statistics table on close button click
     document.querySelector('.close').addEventListener('click', function() {
         document.getElementById('SpeedStatisticsPopup').style.display = 'none';
         document.getElementById('SpeedStatisticsButton').style.display = 'block';
