@@ -15,7 +15,7 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-SMS_BYPASS_MOBILE_NUMBER = get_environment_variable("SMS_BYPASS_MOBILE_NUMBER", no_exception=True)
+BYPASS_SMS_PHONE_NUMBER_FOR_AUTOMATION = get_environment_variable("BYPASS_SMS_PHONE_NUMBER_FOR_AUTOMATION", no_exception=True)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
@@ -1206,7 +1206,7 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
             if positive_value_exists(sms_phone_number_we_vote_id) \
             else incoming_sms_we_vote_id
         # We need to link a randomly generated 6-digit code to this voter_device_id
-        sms_bypass_mobile_number = SMS_BYPASS_MOBILE_NUMBER
+        sms_bypass_mobile_number = BYPASS_SMS_PHONE_NUMBER_FOR_AUTOMATION
         if not positive_value_exists(sms_bypass_mobile_number):
             sms_bypass_mobile_number = '+1 808-935-8555'
         cordova_review_bypass = normalized_sms_phone_number == sms_bypass_mobile_number
