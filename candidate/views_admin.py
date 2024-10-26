@@ -2250,20 +2250,24 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     time_difference1 = t1 - t0
     if not performance_dict:
         performance_list = []
-        performance_snapshot = {}
-        performance_list.append(performance_snapshot)
         performance_dict = {
             'candidate_edit_view': performance_list,
         }
     else:
-        performance_list = []
-        performance_snapshot = {}
-        performance_list.append(performance_snapshot)
-        performance_dict = eval(performance_dict)
-        performance_dict['candidate_edit_view'] = performance_list
+        performance_dict = eval(performance_dict)  # Keep existing data
+        performance_list = performance_dict.get('candidate_edit_view', [])
 
-    performance_snapshot["candidate_edit_process_view(request)"] = "took {:.6f} seconds, ".format(
-        time_difference1)
+    # performance_snapshot["candidate_edit_process_view(request)"] = "took {:.6f} seconds, ".format(
+    #     time_difference1)
+
+    performance_snapshot1 = {
+        'name': 'Candidate_edit_view in views_admin.py',
+        'description': 'Retrieve candidate from database to edit/update',
+        'time_difference': time_difference1,
+    }
+    performance_list.append(performance_snapshot1)
+
+
 
     try:
 
@@ -2387,7 +2391,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         #     time_difference4)
 
         performance_snapshot6 = {
-            'name': 'retrieve_candidate_to_office_link_list',
+            'name': 'Retrieve_candidate_to_office_link_list',
             'description': 'Candidate List Manager: Retrieve candidate to office link list (again)',
             'time_difference': time_difference4,
         }
@@ -3063,19 +3067,19 @@ def candidate_edit_process_view(request):
         if positive_value_exists(candidate_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_office_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_election):
-            t0 = time()
+            t16 = time()
             results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
                 state_code=candidate_to_office_link_add_state_code)
-            t1 = time()
-            time_difference1 = t1 - t0
+            t17 = time()
+            time_difference1 = t17 - t16
 
             # performance_snapshot["candidate_manager.get_or_create_candidate_to_office_link"] = "took {:.6f} seconds, ".format(time_difference1)
 
             performance_snapshot = {
-                'name': 'retrieve_candidate_to_office_link_list',
+                'name': 'Retrieve_candidate_to_office_link_list',
                 'description': 'Candidate List Manager: Retrieve candidate to office link list',
                 'time_difference': time_difference1,  # Replace with actual time difference
             }
