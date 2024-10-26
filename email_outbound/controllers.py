@@ -23,7 +23,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY", no_exception=True)
 SENDGRID_EMAIL_VALIDATION_URL = "https://api.sendgrid.com/v3/"
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-
+BYPASS_EMAIL_FOR_AUTOMATION = get_environment_variable("BYPASS_EMAIL_FOR_AUTOMATION", no_exception=True)
 
 def augment_email_address_list(email_address_list, voter):
     email_address_list_augmented = []
@@ -2478,7 +2478,11 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
     # Run the code to send email with sign in verification code (6 digit)
     status += "ABOUT_TO_SEND_SIGN_IN_CODE_EMAIL: " + str(email_address_we_vote_id) + " "
     # We need to link a randomly generated 6-digit code to this voter_device_id
-    results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id)
+    bypass_email_for_automation = BYPASS_EMAIL_FOR_AUTOMATION
+    if not positive_value_exists(bypass_email_for_automation):
+        bypass_email_for_automation = 'bypass@fake.org'
+    cordova_review_bypass = text_for_email_address == bypass_email_for_automation
+    results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id, cordova_review_bypass)
     secret_code = results['secret_code']
     secret_code_system_locked_for_this_voter_device_id = \
         results['secret_code_system_locked_for_this_voter_device_id']
