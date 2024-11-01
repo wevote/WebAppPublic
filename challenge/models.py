@@ -2053,11 +2053,10 @@ class ChallengeManager(models.Manager):
                     challenge_participant_found = True
                     status += 'CHALLENGE_PARTICIPANT_FOUND_WITH_WE_VOTE_ID '
                 else:
-                    challenge_participant_found = False
                     status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_WITH_WE_VOTE_ID '
             else:
                 status += 'CHALLENGE_PARTICIPANT_NOT_FOUND-MISSING_VARIABLES '
-                success = False
+                success = True
         except Exception as e:
             status += 'CHALLENGE_PARTICIPANT_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
             success = False

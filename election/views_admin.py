@@ -1190,6 +1190,10 @@ def election_list_view(request):
                 retrieve_date_completed = refresh_results['retrieve_date_completed']
                 retrieve_date_started = refresh_results['retrieve_date_started']
 
+                # Create a dict for this state if it doesn't exist already
+                if state_code_lower not in election.state_statistics_dict:
+                    election.state_statistics_dict[state_code_lower] = {}
+
                 election.state_statistics_dict[state_code_lower]['data_getting_stale'] = data_getting_stale
                 election.state_statistics_dict[state_code_lower]['refresh_date_added_to_queue'] = \
                     refresh_date_added_to_queue
