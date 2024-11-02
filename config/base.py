@@ -155,6 +155,7 @@ INSTALLED_APPS = (
     'import_export_google_civic',
     'import_export_maplight',
     'import_export_open_people',
+    'import_export_openreplay',
     'import_export_snovio',
     'import_export_targetsmart',
     'import_export_twitter',  # See also twitter (below)
