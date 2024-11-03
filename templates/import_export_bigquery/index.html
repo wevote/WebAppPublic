@@ -1,0 +1,17 @@
+{# templates/import_export_bigquery/index.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Import/Export Data from BigQuery{% endblock %}
+
+{%  block content %}
+
+<h1>Import/Export Data from BigQuery</h1>
+
+<p>
+    In order to help manage the WeVote data lake, these tools help us migrate and look at data coming from WeVote's
+    BigQuery system.
+</p>
+    
+<a href="{% url 'import_export_bigquery:bigquery_event_list' %}">BigQuery Event List</a>
+
+{% endblock %}
