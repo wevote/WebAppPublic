@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'image',
     'import_export_ballotpedia',
     'import_export_batches',
+    'import_export_bigquery',
     'import_export_ctcl',
     'import_export_endorsements',
     'import_export_facebook',

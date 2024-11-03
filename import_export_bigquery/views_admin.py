@@ -1,4 +1,4 @@
-# import_export_openreplay/views_admin.py
+# import_export_bigquery/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -28,13 +28,13 @@ import json
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
-from .models import OpenReplayEvent
+from .models import BigQueryEvent
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
-def import_export_openreplay_index_view(request):
+def import_export_bigquery_index_view(request):
     """
     Provide an index of import/export actions (for We Vote data maintenance)
     """
@@ -43,11 +43,11 @@ def import_export_openreplay_index_view(request):
     template_values = {
         'messages_on_stage':    messages_on_stage,
     }
-    return render(request, 'import_export_openreplay/index.html', template_values)
+    return render(request, 'import_export_bigquery/index.html', template_values)
 
 
 @login_required
-def openreplay_event_list_view(request):
+def bigquery_event_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'analytics_admin'}
     if not voter_has_authority(request, authority_required):
@@ -56,7 +56,7 @@ def openreplay_event_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     messages_on_stage = get_messages(request)
     missing_politician = positive_value_exists(request.GET.get('missing_politician', False))
-    openreplay_event_search = request.GET.get('openreplay_event_search', '')
+    bigquery_event_search = request.GET.get('bigquery_event_search', '')
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_this_year = convert_to_int(request.GET.get('show_this_year', 9999))
@@ -74,13 +74,13 @@ def openreplay_event_list_view(request):
     # Maintenance script section END
     # ################################################
 
-    openreplay_event_count = 0
-    openreplay_event_list = []
+    bigquery_event_count = 0
+    bigquery_event_list = []
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
     try:
-        queryset = OpenReplayEvent.objects.all()
+        queryset = BigQueryEvent.objects.all()
 
         # if positive_value_exists(state_code):
         #     if state_code.lower() == 'na':
@@ -156,26 +156,26 @@ def openreplay_event_list_view(request):
         #
         #             queryset = queryset.filter(final_filters)
 
-        openreplay_event_count = queryset.count()
+        bigquery_event_count = queryset.count()
         if positive_value_exists(show_all):
-            openreplay_event_list = list(queryset[:1000])
+            bigquery_event_list = list(queryset[:1000])
         else:
-            openreplay_event_list = list(queryset[:200])
+            bigquery_event_list = list(queryset[:200])
     except ObjectDoesNotExist:
         # This is fine
         pass
 
-    if positive_value_exists(openreplay_event_count):
+    if positive_value_exists(bigquery_event_count):
         messages.add_message(request, messages.INFO,
-                             "{openreplay_event_count:,} openreplay_events found."
-                             "".format(openreplay_event_count=openreplay_event_count))
+                             "{bigquery_event_count:,} bigquery_events found."
+                             "".format(bigquery_event_count=bigquery_event_count))
 
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'missing_politician':               missing_politician,
         'google_civic_election_id':         google_civic_election_id,
-        'openreplay_event_list':            openreplay_event_list,
-        'openreplay_event_search':          openreplay_event_search,
+        'bigquery_event_list':            bigquery_event_list,
+        'bigquery_event_search':          bigquery_event_search,
         'show_all':                         show_all,
         'show_battleground':                show_battleground,
         'show_this_year':                   show_this_year,
@@ -184,4 +184,4 @@ def openreplay_event_list_view(request):
         'state_list':                       sorted_state_list,
         'years_available':                  OFFICE_HELD_YEARS_AVAILABLE,
     }
-    return render(request, 'import_export_openreplay/openreplay_event_list.html', template_values)
+    return render(request, 'import_export_bigquery/bigquery_event_list.html', template_values)
