@@ -128,31 +128,35 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
         elif positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
             queryset = queryset.filter(candidate_year=current_year)
-        filters = []
         if positive_value_exists(candidate_search):
-            new_filter = Q(candidate_name__icontains=candidate_search)
-            filters.append(new_filter)
+            # search for candidates based on search string
+            search_words = candidate_search.split()
+            filters = []
 
-            new_filter = Q(candidate_twitter_handle__icontains=candidate_search)
-            filters.append(new_filter)
+            for word in search_words:
+                new_filter = Q(candidate_name__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(candidate_twitter_handle2__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(candidate_twitter_handle3__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle2__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(candidate_url__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle3__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(candidate_contact_form_url__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_url__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(party__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_contact_form_url__icontains=word)
+                filters.append(new_filter)
 
-            new_filter = Q(we_vote_id=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(party__icontains=word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id=word)
+                filters.append(new_filter)
 
             # Add the first query
             if len(filters):
