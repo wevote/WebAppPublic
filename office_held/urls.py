@@ -22,7 +22,7 @@ urlpatterns = [
     re_path(r'^real_time_status/$', views_admin.office_held_update_status, name='office_held_update_status'),
     re_path(r'^repair_ocd_id_mismatch/$',
             views_admin.repair_ocd_id_mismatch_damage_view, name='repair_ocd_id_mismatch'),
-    re_path(r'^(?P<office_held_we_vote_id>[0-9]+)/summary/$',
+    re_path(r'^(?P<office_held_we_vote_id>[\w]+)/summary/$',
             views_admin.office_held_summary_view, name='office_held_summary'),
     re_path(r'^update_ocd_id_state_mismatch/', views_admin.update_ocd_id_state_mismatch_view,
             name='update_ocd_id_state_mismatch'),

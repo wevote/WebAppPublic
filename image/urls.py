@@ -17,7 +17,7 @@ urlpatterns = [
         views_admin.create_resized_images_for_organization_view, name='create_resized_images_for_organization'),
     re_path(r'^(?P<voter_id>[0-9]+)/create_resized_images_for_voters/$',
         views_admin.create_resized_images_for_voters_view, name='create_resized_images_for_voters'),
-    re_path(r'^(?P<candidate_we_vote_id>wv[\w]{2}cand[\w]+)/images_for_one_candidate/$',
+    re_path(r'^(?P<candidate_we_vote_id>[0-9]+)/images_for_one_candidate/$',
         views_admin.images_for_one_candidate_view, name='images_for_one_candidate'),
     re_path(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/images_for_one_organization/$',
         views_admin.images_for_one_organization_view, name='images_for_one_organization'),

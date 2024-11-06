@@ -47,7 +47,7 @@ urlpatterns = [
             views_admin.organization_position_new_view, name='organization_position_new', ),
     re_path(r'^(?P<organization_id>[0-9]+)/pos/(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/delete/$',
             views_admin.organization_delete_existing_position_process_form_view, name='organization_position_delete', ),
-    re_path(r'^(?P<organization_id>[0-9]+)/pos/(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/$',
+    re_path(r'^(?P<organization_id>[0-9]+)/pos/(?P<position_we_vote_id>[0-9]+)/$',
             views_admin.organization_position_edit_view, name='organization_position_edit', ),
     re_path(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/pos/(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/$',
             views_admin.organization_position_edit_view, name='organization_we_vote_id_position_edit', ),
