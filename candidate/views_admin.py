@@ -2249,10 +2249,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     politician_we_vote_id = ''
     seo_friendly_path = ''
     status = ''
-    t0 = time()
-    # candidate_edit_process_view(request)
-    t1 = time()
-    time_difference1 = t1 - t0
     if not performance_dict:
         performance_list = []
         performance_dict = {
@@ -2262,20 +2258,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         performance_dict = eval(performance_dict)  # Keep existing data
         performance_list = performance_dict.get('candidate_edit_view', [])
 
-    # performance_snapshot["candidate_edit_process_view(request)"] = "took {:.6f} seconds, ".format(
-    #     time_difference1)
-
-    performance_snapshot1 = {
-        'name': 'Candidate_edit_view in views_admin.py',
-        'description': 'Retrieve candidate from database to edit/update',
-        'time_difference': time_difference1,
-    }
-    performance_list.append(performance_snapshot1)
-
-
-
     try:
-
         if positive_value_exists(candidate_id):
             candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         else:
@@ -2698,13 +2681,11 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'web_app_root_url':     web_app_root_url,
         }
 
-    performance_summary_dict = {
-        'view_name': 'candidate_edit',
-        'performance_list': performance_list,
-    }
-
-    print(performance_summary_dict)
-
+    # performance_summary_dict = {
+    #     'view_name': 'candidate_edit',
+    #     'performance_list': performance_list,
+    # }
+    # print(performance_summary_dict)
     return render(request, 'candidate/candidate_edit.html', template_values)
 
 
