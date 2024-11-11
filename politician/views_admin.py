@@ -1144,7 +1144,30 @@ def politician_list_view(request):
         web_app_root_url = 'https://localhost:3000'
     else:
         web_app_root_url = 'https://quality.WeVote.US'
+    checkbox_url_variables = "" \
+        "exclude_politician_analysis_done={exclude_politician_analysis_done}" \
+        "&hide_politicians_with_photos={hide_politicians_with_photos}" \
+        "&organization_manual_intervention_needed={organization_manual_intervention_needed}" \
+        "&show_all={show_all}" \
+        "&show_battleground={show_battleground}" \
+        "&show_ocd_id_state_mismatch={show_ocd_id_state_mismatch}" \
+        "&show_politicians_with_email={show_politicians_with_email}" \
+        "&show_related_candidates={show_related_candidates}" \
+        "&was_candidate_recently={was_candidate_recently}" \
+        "".format(
+            exclude_politician_analysis_done=exclude_politician_analysis_done,
+            hide_politicians_with_photos=hide_politicians_with_photos,
+            organization_manual_intervention_needed=organization_manual_intervention_needed,
+            politician_search=politician_search,
+            show_all=show_all,
+            show_battleground=show_battleground,
+            show_ocd_id_state_mismatch=show_ocd_id_state_mismatch,
+            show_politicians_with_email=show_politicians_with_email,
+            show_related_candidates=show_related_candidates,
+            was_candidate_recently=was_candidate_recently,
+            )
     template_values = {
+        'checkbox_url_variables':       checkbox_url_variables,
         'election_list':                election_list,
         'exclude_politician_analysis_done': exclude_politician_analysis_done,
         'google_civic_election_id':     google_civic_election_id,
