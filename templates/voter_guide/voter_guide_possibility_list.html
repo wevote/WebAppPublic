@@ -4,6 +4,7 @@
 {% block title %}Endorsement Websites{% endblock %}
 
 {% block content %}
+{% include "admin_tools/loading_banner.html" %}
 {% load template_filters %}
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -248,7 +249,7 @@
             </select>
         </div>
         <div class="col-xs-1">
-            <input type="submit" value="Save" class="btn btn-primary" />
+            <input type="submit" value="Save" class="btn btn-primary"/>
         </div>
     </div>
 
@@ -290,23 +291,30 @@
     <br />
     <br />
     <script>
+    function displayLoadingBanner() {
+        document.getElementById('FilterPopupMessage').style.display ='block';
+    };
     $(function() {
         $('#assigned_to_voter_we_vote_id_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#google_civic_election_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#show_number_of_ballot_items_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
