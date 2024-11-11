@@ -29,9 +29,7 @@
                         {% if stat.name %}
                             <td>{{ stat.name }}</td>
                             <td>{{ stat.time_difference|floatformat:4 }}</td>
-                            <td style="
-                                font-weight: 300;
-                                color: #666;">
+                            <td style="font-weight: 300; color: #666; text-align: left;">
                                 {{ stat.description }}
                             </td>
                         {% else %}
@@ -44,11 +42,13 @@
     </table>
 
 
-    </div>
+</div>
 
-<button id="SpeedStatisticsButton" class="toggle_button" style="padding: 10px 20px; border: 1px solid black; background-color: white; cursor: pointer;">
-    Speed Statistics
-</button>
+<div style="display: flex; justify-content: flex-end;">
+    <button id="SpeedStatisticsButton" class="toggle_button" style="padding: 10px 20px; border: 1px solid black; background-color: white; cursor: pointer;">
+        Speed Statistics
+    </button>
+</div>
 <script>
     // Handle showing the Speed Statistics table on button click
     document.querySelector('.toggle_button').addEventListener('click', function() {

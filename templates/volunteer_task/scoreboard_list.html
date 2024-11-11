@@ -1,4 +1,4 @@
-{# templates/volunteer_task/performance_list.html #}
+{# templates/volunteer_task/scoreboard_list.html #}
 {% extends "template_base.html" %}
 
 {% block title %}Scoreboard{% endblock %}
@@ -6,14 +6,15 @@
 {% block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/speed_statistics_banner.html" with performance_dict=performance_dict %}
 
 <h1>Scoreboard</h1>
 {# Dropdown to choose which team scores to display #}
-<form name="team_name" method="get" action="{% url 'volunteer_task:performance_list' %}">
+<form name="team_name" method="post" action="{% url 'volunteer_task:scoreboard_list_process' %}">
   {# Filter by VolunteerTeam: Only show members of the chosen team #}
-  <div class="form-group pull-left">
+  <div>
       <label for="team_name_id" class="control-label">
-        <span class="u-no-break">Filter by Team:</span>
+          <span class="u-no-break">Filter by Team:</span>
       </label>
       <select id="team_select_id" name="team_we_vote_id">
           <option value="">-- choose team --</option>
@@ -23,24 +24,49 @@
           <option value="NOT_ASSIGNED_TO_TEAM" {% if team_name|slugify == "NOT_ASSIGNED_TO_TEAM"|slugify %}selected="selected"{% endif %}>* Not Assigned to Team *</option>
       </select>
     &nbsp;&nbsp;&nbsp;
+    {% if team_performance_dict.which_day_is_end_of_week_display %}
+        End of Week: 
+        {{ team_performance_dict.which_day_is_end_of_week_display }}
+    {% endif %}
   </div>
-</form>
 
 {% if team_we_vote_id %}
+<div style="display:flex; justify-content: space-between">
     <div>
-        {% if team_performance_dict.which_day_is_end_of_week_display %}
-            End of Week: 
-            {{ team_performance_dict.which_day_is_end_of_week_display }}&nbsp;&nbsp;|&nbsp;
-        {% endif %}
+      <label for="team_members_id" class="control-label">
+          <span class="u-no-break">Team Members:&nbsp;</span>
+      </label>
         {% for volunteer_team_member in volunteer_team_member_list %}
             {% if forloop.counter > 1 %}&nbsp;|&nbsp;{% endif %}
-            <a href="{% url 'voter:voter_summary_we_vote_id' volunteer_team_member.voter.we_vote_id %}"
+            <input type="checkbox" name="delete_volunteer_team_member_{{ volunteer_team_member.id }}" id="select_for_deleting_id" value="{{ volunteer_team_member.voter.we_vote_id }}"/>
+            <a href="{% url 'voter:voter_edit_we_vote_id' volunteer_team_member.voter.we_vote_id %}"
                 target="_blank">
                 {{ volunteer_team_member.voter.get_full_name }}
                 <span class="glyphicon glyphicon-new-window"></span></a>
         {% endfor %}
+        {% if volunteer_team_member_list|length > 0 %}
+            &nbsp;&nbsp;
+            <button type="submit" class="btn btn-default btn-sm" name="save_button">Delete</button>
+        {% endif %}
     </div>
+    <div>
+        <label for="add_team_members_id" class="control-label">
+            <span class="u-no-break">Add:&nbsp;</span>
+        </label>
+        <select id="add_team_members_id" name="add_team_member_we_vote_id">
+            <option value="">-- choose person to add --</option>
+        {% for possible_team_member in possible_team_member_list %}
+            <option value="{{ possible_team_member.we_vote_id }}">{{ possible_team_member.get_full_name }}</option>
+        {% endfor %}
+        </select>
+        {% if possible_team_member_list|length > 0 %}
+            &nbsp;&nbsp;
+            <button type="submit" class="btn btn-default btn-sm" name="save_button">Save</button>
+        {% endif %}
+    </div>
+</div>
 {% endif %}
+</form>
 
 <div style="font-size: 1.4em">
 <table class="table table-condensed table-hover">
@@ -229,7 +255,7 @@
         <td>
         {% with voter_dict=individual_performance_dict|get_value_from_dict:voter_we_vote_id %}
             <strong><span style="font-size: 1.2em">{{ voter_dict.voter_display_name }}</span></strong>
-            <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}"
+            <a href="{% url 'voter:voter_edit_we_vote_id' voter_we_vote_id %}"
                 target="_blank">
                 <span class="glyphicon glyphicon-new-window"></span></a>
             <br />

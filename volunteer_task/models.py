@@ -209,9 +209,16 @@ class VolunteerWeeklyMetrics(models.Model):
     voter_date_unique_string = models.CharField(max_length=255, null=True, db_index=True, unique=True)
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
     voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
-    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, null=True)
     # For teams that meet on Friday, we want Thursday to be the end-of-week. Note Monday is 0 and Sunday is 6
-    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False, db_index=True)
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['voter_we_vote_id', 'which_day_is_end_of_week', 'end_of_week_date_integer'],
+                name='vol_weekly_index'),
+        ]
 
 
 def display_action_constant_human_readable(action_constant):
