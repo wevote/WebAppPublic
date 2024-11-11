@@ -574,6 +574,21 @@
 
 {% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
 
+<div class="row form-group">
+    <label for="analysis_comment_id" class="pl-4 control-label">
+        Politician Analysis
+    </label>
+    <div class="col">
+        <textarea name="politician_analysis_comment"
+                  class="form-control animated"
+                  id="politician_analysis_comment_id"
+                  placeholder="Note about politician..."></textarea>
+        <input type="checkbox" name="politician_analysis_done" id="politician_analysis_done_id" value="1"
+                {% if politician.politician_analysis_done %}checked{% endif %} />
+        <label for="politician_analysis_done_id" style="font-weight: normal !important;">Politician Analysis Complete{% if politician.politician_analysis_done %}. <span style="color: darkgray">One of our team has researched this politician and could not find more information.</span>{% endif %}</label>
+    </div>
+</div>
+
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" class="btn-primary" /></p>
 

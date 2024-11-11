@@ -349,6 +349,7 @@ class Politician(models.Model):
     youtube_url = models.TextField(blank=True, null=True)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     date_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
+    date_ultimate_election_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     profile_image_background_color_needed = models.BooleanField(null=True)
     # These fields manage the linkage between this politician and the organization/endorser object

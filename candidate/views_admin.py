@@ -1316,10 +1316,15 @@ def candidate_list_view(request):
             # datetime_now = timezone.localize(datetime.now())
             timezone, datetime_now = generate_localized_datetime_from_obj()
             if positive_value_exists(election.election_day_text):
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
-                if date_of_election > datetime_now:
-                    time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
+                try:
+                    date_of_election = \
+                        timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD))  # "%Y-%m-%d"
+                    if date_of_election > datetime_now:
+                        time_until_election = date_of_election - datetime_now
+                        election.days_until_election = \
+                            convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days)  # "%d"
+                except Exception as e:
+                    pass
 
             # How many offices?
             office_list_query = ContestOffice.objects.using('readonly').all()
