@@ -568,7 +568,11 @@ def politician_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     create_followers_on = positive_value_exists(request.GET.get('create_followers_on', False))
+    exclude_politician_analysis_done = request.GET.get('exclude_politician_analysis_done', False)
+    federal_or_state = positive_value_exists(request.GET.get('federal_or_state', False))
     politicians_to_create_followers_for = convert_to_int(request.GET.get('politicians_to_create_followers_for', 1000))
+    hide_politicians_with_photos = \
+        positive_value_exists(request.GET.get('hide_politicians_with_photos', False))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     messages_on_stage = get_messages(request)
     organization_manual_intervention_needed = \
@@ -584,6 +588,7 @@ def politician_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
+    was_candidate_recently = positive_value_exists(request.GET.get('was_candidate_recently', False))
 
     # ################################################
     # Maintenance script section START
@@ -878,6 +883,12 @@ def politician_list_view(request):
     politician_list_count = 0
     try:
         politician_query = Politician.objects.using('readonly').all()
+        if positive_value_exists(exclude_politician_analysis_done):
+            politician_query = politician_query.exclude(politician_analysis_done=True)
+        if positive_value_exists(hide_politicians_with_photos):
+            # Show candidates that do NOT have photos
+            politician_query = politician_query.filter(
+                Q(we_vote_hosted_profile_image_url_medium__isnull=True) | Q(we_vote_hosted_profile_image_url_medium=""))
         if positive_value_exists(show_battleground):
             year_filters = []
             for year_integer in IS_BATTLEGROUND_YEARS_AVAILABLE:
@@ -973,6 +984,9 @@ def politician_list_view(request):
                         final_filters |= item
 
                     politician_query = politician_query.filter(final_filters)
+
+        if positive_value_exists(was_candidate_recently):
+            politician_query = politician_query.filter(politician_ultimate_election_date__gte=20240101)
 
         politician_list_count = politician_query.count()
         if not positive_value_exists(show_all):
@@ -1132,7 +1146,9 @@ def politician_list_view(request):
         web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
         'election_list':                election_list,
+        'exclude_politician_analysis_done': exclude_politician_analysis_done,
         'google_civic_election_id':     google_civic_election_id,
+        'hide_politicians_with_photos': hide_politicians_with_photos,
         'messages_on_stage':            messages_on_stage,
         'organization_manual_intervention_needed': organization_manual_intervention_needed,
         'organization_might_be_needed_count':   organization_might_be_needed_count,
@@ -1146,6 +1162,7 @@ def politician_list_view(request):
         'show_ocd_id_state_mismatch':   show_ocd_id_state_mismatch,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
+        'was_candidate_recently':       was_candidate_recently,
         'web_app_root_url':             web_app_root_url,
     }
     return render(request, 'politician/politician_list.html', template_values)
@@ -2482,10 +2499,11 @@ def politician_edit_process_view(request):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     linkedin_url = request.POST.get('linkedin_url', False)
     maplight_id = request.POST.get('maplight_id', False)
-    candidate_analysis_comment = request.POST.get('candidate_analysis_comment', '')
-    if positive_value_exists(candidate_analysis_comment):
-        change_description += "ANALYSIS_COMMENT: " + candidate_analysis_comment + " "
+    politician_analysis_comment = request.POST.get('politician_analysis_comment', '')
+    if positive_value_exists(politician_analysis_comment):
+        change_description += "ANALYSIS_COMMENT: " + politician_analysis_comment + " "
         change_description_changed = True
+    politician_analysis_done = positive_value_exists(request.POST.get('politician_analysis_done', False))
     politician_email = request.POST.get('politician_email', False)
     politician_email2 = request.POST.get('politician_email2', False)
     politician_email3 = request.POST.get('politician_email3', False)
@@ -2909,6 +2927,7 @@ def politician_edit_process_view(request):
                         years_false_list.append(year)
                     setattr(politician_on_stage, is_battleground_race_key, incoming_is_battleground_race)
             years_list = list(set(years_false_list + years_true_list))
+            politician_on_stage.politician_analysis_done = politician_analysis_done
             if linkedin_url is not False:
                 change_results = change_tracking(
                     existing_value=politician_on_stage.linkedin_url,
@@ -3644,7 +3663,7 @@ def politician_edit_process_view(request):
             voter_we_vote_id = voter_on_stage.we_vote_id
 
         from volunteer_task.controllers import is_candidate_or_politician_analysis_done
-        if positive_value_exists(candidate_analysis_comment) \
+        if positive_value_exists(politician_analysis_comment) \
                 or is_candidate_or_politician_analysis_done(changes_found_dict=changes_found_dict):
             kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
         else:
@@ -4144,7 +4163,7 @@ def update_politicians_from_candidates_view(request):
         queryset = queryset.exclude(date_last_updated_from_candidate__gt=six_months_ago)
         politician_list = list(queryset[:3000])
     except Exception as e:
-        status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
+        status += "POLITICIAN_QUERY_FAILED: " + str(e) + " "
 
     # Retrieve all related candidates with one query
     politician_we_vote_id_list = []
@@ -4207,6 +4226,144 @@ def update_politicians_from_candidates_view(request):
                                 "".format(
                                     state_code=state_code))
 
+
+@login_required
+def update_politician_ultimate_election_date_from_candidates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    all_entries_processed = False
+    politicians_updated = 0
+    politicians_without_changes = 0
+    status = ""
+    success = True
+    state_code = request.GET.get('state_code', "")
+    safety_valve_limit = 0
+
+    while safety_valve_limit < 30 and success and not all_entries_processed:
+        results = update_politician_ultimate_election_date_from_candidates_action(request)
+        politicians_updated += results['politicians_updated']
+        politicians_without_changes += results['politicians_without_changes']
+        success = results['success']
+        status += results['status']
+        safety_valve_limit += 1
+        total_to_update_after = results['total_to_update_after']
+        if total_to_update_after == 0:
+            all_entries_processed = True
+
+    message = \
+        "Politicians updated: {politicians_updated:,}. " \
+        "Politicians without changes: {politicians_without_changes:,}. " \
+        "".format(
+            politicians_updated=politicians_updated,
+            politicians_without_changes=politicians_without_changes)
+
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?state_code={state_code}"
+                                "".format(
+                                    state_code=state_code))
+
+
+def update_politician_ultimate_election_date_from_candidates_action(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    status = ""
+    success = True
+    state_code = request.GET.get('state_code', "")
+    total_to_update_after = 0
+
+    politician_list = []
+    try:
+        queryset = Politician.objects.all()
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        # Ignore politicians who have been updated in the last 6 months: date_last_updated_from_politician
+        today = datetime.now().date()
+        six_months = timedelta(weeks=26)
+        six_months_ago = today - six_months
+        queryset = queryset.exclude(date_ultimate_election_last_updated_from_candidate__gt=six_months_ago)
+        total_to_update_after = queryset.count()
+        politician_list = list(queryset[:3000])
+    except Exception as e:
+        status += "POLITICIAN_QUERY_FAILED: " + str(e) + " "
+
+    # Retrieve all related candidates with one query
+    politician_we_vote_id_list = []
+    for politician in politician_list:
+        if positive_value_exists(politician.we_vote_id):
+            if politician.we_vote_id not in politician_we_vote_id_list:
+                politician_we_vote_id_list.append(politician.we_vote_id)
+
+    candidate_list_by_politician_we_vote_id = {}
+    if len(politician_we_vote_id_list) > 0:
+        queryset = CandidateCampaign.objects.all()
+        queryset = queryset.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+        queryset = queryset.filter(candidate_ultimate_election_date__gt=0)
+        queryset = queryset.order_by('-candidate_year', '-candidate_ultimate_election_date')
+        candidate_list = list(queryset)
+        for one_candidate in candidate_list:
+            # Only put the first one in
+            if one_candidate.politician_we_vote_id not in candidate_list_by_politician_we_vote_id:
+                candidate_list_by_politician_we_vote_id[one_candidate.politician_we_vote_id] = one_candidate
+
+    # Loop through all the politicians in this year, and update them with some politician data
+    politician_update_errors = 0
+    update_list = []
+    politicians_updated = 0
+    politicians_without_changes = 0
+    for we_vote_politician in politician_list:
+        we_vote_politician.date_ultimate_election_last_updated_from_candidate = localtime(now()).date()
+        if we_vote_politician.we_vote_id in candidate_list_by_politician_we_vote_id:
+            candidate = candidate_list_by_politician_we_vote_id[we_vote_politician.we_vote_id]
+        else:
+            candidate = None
+        if not candidate or not hasattr(candidate, 'we_vote_id'):
+            update_list.append(we_vote_politician)
+            continue
+
+        if positive_value_exists(candidate.candidate_ultimate_election_date):
+            if positive_value_exists(we_vote_politician.politician_ultimate_election_date):
+                if candidate.candidate_ultimate_election_date > we_vote_politician.politician_ultimate_election_date:
+                    we_vote_politician.politician_ultimate_election_date = candidate.candidate_ultimate_election_date
+                else:
+                    # Don't update because politician_ultimate_election_date is further in future
+                    pass
+            else:
+                we_vote_politician.politician_ultimate_election_date = candidate.candidate_ultimate_election_date
+            politicians_updated += 1
+        else:
+            politicians_without_changes += 1
+        update_list.append(we_vote_politician)
+
+    # Now do bulk update here
+    if len(update_list) > 0:
+        try:
+            updates_made = Politician.objects.bulk_update(
+                update_list,
+                ['date_ultimate_election_last_updated_from_candidate',
+                 'politician_ultimate_election_date'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} politician entries updated with ultimate_election_date. "
+                                 "{total_to_update_after:,} remaining."
+                                 "".format(total_to_update_after=total_to_update_after,
+                                           updates_made=updates_made))
+        except Exception as e:
+            messages.add_message(
+                request, messages.ERROR,
+                "ERROR with update_politician_ultimate_election_date_from_candidates_view: {e} "
+                "".format(e=e))
+            success = False
+    results = {
+        'politicians_updated': politicians_updated,
+        'politicians_without_changes': politicians_without_changes,
+        'status': status,
+        'success': success,
+        'total_to_update_after': total_to_update_after,
+    }
+    return results
 
 def update_profile_image_background_color_view_for_politicians(request):
     number_to_update = 5000
