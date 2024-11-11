@@ -24,9 +24,9 @@
           <option value="NOT_ASSIGNED_TO_TEAM" {% if team_name|slugify == "NOT_ASSIGNED_TO_TEAM"|slugify %}selected="selected"{% endif %}>* Not Assigned to Team *</option>
       </select>
     &nbsp;&nbsp;&nbsp;
-    {% if team_performance_dict.which_day_is_end_of_week_display %}
+    {% if team_score_dict.which_day_is_end_of_week_display %}
         End of Week: 
-        {{ team_performance_dict.which_day_is_end_of_week_display }}
+        {{ team_score_dict.which_day_is_end_of_week_display }}
     {% endif %}
   </div>
 
@@ -96,124 +96,124 @@
     <tr>
         <td></td>
         <td>
-            <strong><span style="font-size: 1.2em">{{ team_performance_dict.team_name }}</span></strong><br />
-            {% if team_performance_dict.candidates_created %}
+            <strong><span style="font-size: 1.2em">{{ team_score_dict.team_name }}</span></strong><br />
+            {% if team_score_dict.candidates_created %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Created</span><br />
             {% endif %}
-            {% if team_performance_dict.politicians_augmented %}
+            {% if team_score_dict.politicians_augmented %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Augmented</span><br />
             {% endif %}
-            {% if team_performance_dict.duplicate_politician_analysis %}
+            {% if team_score_dict.duplicate_politician_analysis %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Duplicate Analysis</span><br />
             {% endif %}
-            {% if team_performance_dict.politicians_deduplicated %}
+            {% if team_score_dict.politicians_deduplicated %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated</span><br />
             {% endif %}
-            {% if team_performance_dict.match_candidates_to_politicians %}
+            {% if team_score_dict.match_candidates_to_politicians %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates Matched to Politicians</span><br />
             {% endif %}
-            {% if team_performance_dict.politicians_photo_added %}
+            {% if team_score_dict.politicians_photo_added %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Candidates / Politicians Photos</span><br />
             {% endif %}
-            {% if team_performance_dict.election_retrieve_started %}
+            {% if team_score_dict.election_retrieve_started %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Election Data Retrieved</span><br />
             {% endif %}
-            {% if team_performance_dict.positions_saved %}
+            {% if team_score_dict.positions_saved %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Opinions/Endorsements Saved</span><br />
             {% endif %}
-            {% if team_performance_dict.position_comments_saved %}
+            {% if team_score_dict.position_comments_saved %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Opinion/Endorsement Comments Saved</span><br />
             {% endif %}
-            {% if team_performance_dict.politicians_requested_changes %}
+            {% if team_score_dict.politicians_requested_changes %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Politicians Requested Changes</span><br />
             {% endif %}
-            {% if team_performance_dict.twitter_bulk_retrieve %}
+            {% if team_score_dict.twitter_bulk_retrieve %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Bulk Retrieve (Started)</span><br />
             {% endif %}
-            {% if team_performance_dict.voter_guide_possibilities_created %}
+            {% if team_score_dict.voter_guide_possibilities_created %}
                 <span class="u-no-break">&nbsp;&nbsp;&nbsp;Voter Guides Saved</span><br />
             {% endif %}
         </td>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
         <td>
-        {% with team_one_date_dict=team_performance_dict|get_value_from_dict:end_of_week_date_integer %}
+        {% with team_one_date_dict=team_score_dict|get_value_from_dict:end_of_week_date_integer %}
             <strong><span style="font-size: 1.2em">{{ team_one_date_dict.volunteer_task_total|display_nothing_if_zero|intcomma }}</span></strong><br />
-            {% if team_performance_dict.candidates_created %}{# Show row if any candidates_created #}
+            {% if team_score_dict.candidates_created %}{# Show row if any candidates_created #}
             {{ team_one_date_dict.candidates_created|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_augmented %}
+            {% if team_score_dict.politicians_augmented %}
             {{ team_one_date_dict.politicians_augmented|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.duplicate_politician_analysis %}
+            {% if team_score_dict.duplicate_politician_analysis %}
             {{ team_one_date_dict.duplicate_politician_analysis|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_deduplicated %}
+            {% if team_score_dict.politicians_deduplicated %}
             {{ team_one_date_dict.politicians_deduplicated|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.match_candidates_to_politicians %}
+            {% if team_score_dict.match_candidates_to_politicians %}
             {{ team_one_date_dict.match_candidates_to_politicians|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_photo_added %}
+            {% if team_score_dict.politicians_photo_added %}
             {{ team_one_date_dict.politicians_photo_added|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.election_retrieve_started %}
+            {% if team_score_dict.election_retrieve_started %}
             {{ team_one_date_dict.election_retrieve_started|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.positions_saved %}
+            {% if team_score_dict.positions_saved %}
             {{ team_one_date_dict.positions_saved|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.position_comments_saved %}
+            {% if team_score_dict.position_comments_saved %}
             {{ team_one_date_dict.position_comments_saved|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_requested_changes %}
+            {% if team_score_dict.politicians_requested_changes %}
             {{ team_one_date_dict.politicians_requested_changes|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.twitter_bulk_retrieve %}
+            {% if team_score_dict.twitter_bulk_retrieve %}
             {{ team_one_date_dict.twitter_bulk_retrieve|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.voter_guide_possibilities_created %}
+            {% if team_score_dict.voter_guide_possibilities_created %}
             {{ team_one_date_dict.voter_guide_possibilities_created|display_nothing_if_zero|intcomma }}<br />
             {% endif %}
         {% endwith %}
         </td>
     {% endfor %}
         <td>
-            <strong><span style="font-size: 1.2em">{{ team_performance_dict.volunteer_task_total|intcomma }}</span></strong><br />
-            {% if team_performance_dict.candidates_created %}
-            {{ team_performance_dict.candidates_created|intcomma }}<br />
+            <strong><span style="font-size: 1.2em">{{ team_score_dict.volunteer_task_total|intcomma }}</span></strong><br />
+            {% if team_score_dict.candidates_created %}
+            {{ team_score_dict.candidates_created|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_augmented %}
-            {{ team_performance_dict.politicians_augmented|intcomma }}<br />
+            {% if team_score_dict.politicians_augmented %}
+            {{ team_score_dict.politicians_augmented|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.duplicate_politician_analysis %}
-            {{ team_performance_dict.duplicate_politician_analysis|intcomma }}<br />
+            {% if team_score_dict.duplicate_politician_analysis %}
+            {{ team_score_dict.duplicate_politician_analysis|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_deduplicated %}
-            {{ team_performance_dict.politicians_deduplicated|intcomma }}<br />
+            {% if team_score_dict.politicians_deduplicated %}
+            {{ team_score_dict.politicians_deduplicated|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.match_candidates_to_politicians %}
-            {{ team_performance_dict.match_candidates_to_politicians|intcomma }}<br />
+            {% if team_score_dict.match_candidates_to_politicians %}
+            {{ team_score_dict.match_candidates_to_politicians|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_photo_added %}
-            {{ team_performance_dict.politicians_photo_added|intcomma }}<br />
+            {% if team_score_dict.politicians_photo_added %}
+            {{ team_score_dict.politicians_photo_added|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.election_retrieve_started %}
-            {{ team_performance_dict.election_retrieve_started|intcomma }}<br />
+            {% if team_score_dict.election_retrieve_started %}
+            {{ team_score_dict.election_retrieve_started|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.positions_saved %}
-            {{ team_performance_dict.positions_saved|intcomma }}<br />
+            {% if team_score_dict.positions_saved %}
+            {{ team_score_dict.positions_saved|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.position_comments_saved %}
-            {{ team_performance_dict.position_comments_saved|intcomma }}<br />
+            {% if team_score_dict.position_comments_saved %}
+            {{ team_score_dict.position_comments_saved|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.politicians_requested_changes %}
-            {{ team_performance_dict.politicians_requested_changes|intcomma }}<br />
+            {% if team_score_dict.politicians_requested_changes %}
+            {{ team_score_dict.politicians_requested_changes|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.twitter_bulk_retrieve %}
-            {{ team_performance_dict.twitter_bulk_retrieve|intcomma }}<br />
+            {% if team_score_dict.twitter_bulk_retrieve %}
+            {{ team_score_dict.twitter_bulk_retrieve|intcomma }}<br />
             {% endif %}
-            {% if team_performance_dict.voter_guide_possibilities_created %}
-            {{ team_performance_dict.voter_guide_possibilities_created|intcomma }}<br />
+            {% if team_score_dict.voter_guide_possibilities_created %}
+            {{ team_score_dict.voter_guide_possibilities_created|intcomma }}<br />
             {% endif %}
         </td>
     </tr>
@@ -253,7 +253,7 @@
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
-        {% with voter_dict=individual_performance_dict|get_value_from_dict:voter_we_vote_id %}
+        {% with voter_dict=individual_score_dict|get_value_from_dict:voter_we_vote_id %}
             <strong><span style="font-size: 1.2em">{{ voter_dict.voter_display_name }}</span></strong>
             <a href="{% url 'voter:voter_edit_we_vote_id' voter_we_vote_id %}"
                 target="_blank">
@@ -299,7 +299,7 @@
         </td>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
         <td>
-        {% with voter_dict=individual_performance_dict|get_value_from_dict:voter_we_vote_id %}
+        {% with voter_dict=individual_score_dict|get_value_from_dict:voter_we_vote_id %}
         {% with voter_one_date_dict=voter_dict|get_value_from_dict:end_of_week_date_integer %}
             <strong><span style="font-size: 1.2em">{{ voter_one_date_dict.volunteer_task_total|display_nothing_if_zero|intcomma }}</span></strong><br />
             {% if voter_dict.candidates_created %}{# Show row if any candidates_created #}
@@ -343,7 +343,7 @@
         </td>
     {% endfor %}
         <td>
-        {% with voter_dict=individual_performance_dict|get_value_from_dict:voter_we_vote_id %}
+        {% with voter_dict=individual_score_dict|get_value_from_dict:voter_we_vote_id %}
             <strong><span style="font-size: 1.2em">{{ voter_dict.volunteer_task_total|intcomma }}</span></strong><br />
             {% if voter_dict.candidates_created %}
             {{ voter_dict.candidates_created|intcomma }}<br />
