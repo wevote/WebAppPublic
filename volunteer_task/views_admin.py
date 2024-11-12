@@ -91,14 +91,16 @@ def scoreboard_list_view(request):
     results = update_weekly_volunteer_metrics(
         which_day_is_end_of_week=which_day_is_end_of_week,
         recalculate_all=recalculate_all)
+    update_performance_list = results['performance_list']
+    performance_dict['update_weekly_volunteer_metrics'] = update_performance_list
     t1 = time()
     time_difference = t1 - t0
-    performance_snapshot2 = {
+    performance_snapshot = {
         'name': 'update_weekly_volunteer_metrics',
         'description': 'Calculates and updates weekly metrics',
         'time_difference': time_difference,
     }
-    performance_list.append(performance_snapshot2)
+    performance_list.append(performance_snapshot)
 
     # earliest_for_display_date_integer = 20240410
     today = date.today()
