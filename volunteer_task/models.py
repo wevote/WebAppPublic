@@ -206,7 +206,7 @@ class VolunteerWeeklyMetrics(models.Model):
     position_comments_saved = models.PositiveIntegerField(default=0)
     twitter_bulk_retrieve = models.PositiveIntegerField(default=0)
     # We create this unique identifier to we can prevent duplicates: voter_we_vote_id + "-" + end_of_week_date_integer
-    voter_date_unique_string = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    voter_date_unique_string = models.CharField(max_length=255, null=True, db_index=True)
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
     voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
     voter_we_vote_id = models.CharField(max_length=255, null=True)
@@ -218,6 +218,9 @@ class VolunteerWeeklyMetrics(models.Model):
             models.Index(
                 fields=['voter_we_vote_id', 'which_day_is_end_of_week', 'end_of_week_date_integer'],
                 name='vol_weekly_index'),
+            models.Index(
+                fields=['voter_date_unique_string'],
+                name='voter_date_unique_string'),
         ]
 
 

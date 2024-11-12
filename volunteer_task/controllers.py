@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from datetime import date, timedelta
+from time import time
 from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, \
     VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED, \
     VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS, \
@@ -335,7 +336,7 @@ def update_or_create_weekly_metrics_one_volunteer(
                     voter_guide_possibilities_created += 1
 
     voter_date_unique_string = \
-        str(voter_we_vote_id) + "-" + str(end_of_week_date_integer) + "-" + str(which_day_is_end_of_week)
+        generate_voter_date_unique_string(voter_we_vote_id, end_of_week_date_integer, which_day_is_end_of_week)
     updates = {
         'candidates_created':                   candidates_created,
         'duplicate_politician_analysis':        duplicate_politician_analysis,
@@ -373,6 +374,13 @@ def update_or_create_weekly_metrics_one_volunteer(
         'volunteer_weekly_metrics':         volunteer_weekly_metrics,
     }
     return results
+
+
+def generate_voter_date_unique_string(
+        voter_we_vote_id='',
+        end_of_week_date_integer=0,
+        which_day_is_end_of_week=6):
+    return str(voter_we_vote_id) + "-" + str(end_of_week_date_integer) + "-" + str(which_day_is_end_of_week)
 
 
 def get_key_from_value(val, my_dict):
@@ -417,6 +425,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     which_day_is_start_of_week = get_start_of_week_weekday_from_end_of_week_weekday(which_day_is_end_of_week)
     status = ""
     success = True
+    performance_list = []
     task_list = []
 
     if positive_value_exists(recalculate_all):
@@ -446,6 +455,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
         earliest_start_of_week_integer = 0
         status += "ERROR_RETRIEVING_EARLIEST_START_OF_WEEK_DATE2: " + str(e) + ' '
 
+    t0 = time()
     try:
         queryset = VolunteerTaskCompleted.objects.using('readonly').all()  # 'analytics'
         # We have to process an entire week of task metrics if we last processed within the week.
@@ -456,6 +466,13 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
         success = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'VolunteerTaskCompleted retrieve from date_as_integer',
+        'description': '',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # Break up the results by voter_we_vote_id
     earliest_date_integer = 99991201  # Temp date far in the future, meant to be replaced immediately below
@@ -480,6 +497,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     start_and_end_of_week_date_integer_list = results['start_and_end_of_week_date_integer_list']
 
     voter_list = []
+    t0 = time()
     try:
         queryset = Voter.objects.using('readonly').all()
         queryset = queryset.filter(we_vote_id__in=voter_we_vote_id_list)
@@ -487,14 +505,37 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     except Exception as e:
         status += "ERROR_RETRIEVING_VOTER_LIST: " + str(e) + ' '
         success = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Voter retrieve from voter_we_vote_id_list',
+        'description': '',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     voter_dict_by_voter_we_vote_id = {}
     for voter in voter_list:
         voter_dict_by_voter_we_vote_id[voter.we_vote_id] = voter
 
+    t0 = time()
     all_voters_updated_successfully = True
+    unique_string_list = []
+    # Retrieve all entries for this voter with a single query,
+    #  and use some logic to see if we can skip saving/updating
+    for voter_we_vote_id in voter_we_vote_id_list:
+        for start_and_end_of_week_dict in start_and_end_of_week_date_integer_list:
+            voter_date_unique_string = \
+                generate_voter_date_unique_string(
+                    voter_we_vote_id=voter_we_vote_id,
+                    end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                    which_day_is_end_of_week=which_day_is_end_of_week)
+            unique_string_list.append(voter_date_unique_string)
+
+    # Retrieve from database
+
     for voter_we_vote_id in voter_we_vote_id_list:
         voter = voter_dict_by_voter_we_vote_id.get(voter_we_vote_id)
+        # Now process new entries for this voter
         for start_and_end_of_week_dict in start_and_end_of_week_date_integer_list:
             results = update_or_create_weekly_metrics_one_volunteer(
                 end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
@@ -505,6 +546,13 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
             )
             if not results['success']:
                 all_voters_updated_successfully = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Looping through update_or_create_weekly_metrics_one_volunteer',
+        'description': 'unique_string_list count: {count}'.format(count=len(unique_string_list)),
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # We keep calculating the last week to deal with teams with different end_of_week days
     week_ago_integer = 0
@@ -523,7 +571,8 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
             success = False
 
     results = {
-        'status':                           status,
-        'success':                          success,
+        'status':           status,
+        'success':          success,
+        'performance_list': performance_list,
     }
     return results
