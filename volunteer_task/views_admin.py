@@ -5,6 +5,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -490,7 +491,11 @@ def scoreboard_list_view(request):
     possible_team_member_list = []
     try:
         queryset = Voter.objects.using('readonly').all().order_by('first_name')
-        queryset = queryset.filter(is_political_data_manager=True)
+        queryset = queryset.filter(
+            Q(is_admin=True) |
+            Q(is_analytics_admin=True) |
+            Q(is_political_data_manager=True)
+        )
         queryset = queryset.exclude(we_vote_id__in=voter_team_member_we_vote_id_list)
         possible_team_member_list = list(queryset)
     except Exception as e:

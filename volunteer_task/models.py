@@ -195,6 +195,7 @@ class VolunteerWeeklyMetrics(models.Model):
     #  And this end-of-week date is Sunday from ISO 8601 Standard
     end_of_week_date_integer = models.PositiveIntegerField(null=True, db_index=True)
     candidates_created = models.PositiveIntegerField(default=0)
+    date_last_updated_as_integer = models.PositiveIntegerField(null=True)
     duplicate_politician_analysis = models.PositiveIntegerField(default=0)
     election_retrieve_started = models.PositiveIntegerField(default=0)
     match_candidates_to_politicians = models.PositiveIntegerField(default=0)
