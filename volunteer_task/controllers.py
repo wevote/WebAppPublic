@@ -616,15 +616,24 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
                     which_day_is_end_of_week=which_day_is_end_of_week)
             if voter_date_unique_string in volunteer_weekly_metrics_dict:
                 volunteer_weekly_metrics = volunteer_weekly_metrics_dict[voter_date_unique_string]
+                both_positive_numbers = False
                 date_last_updated_as_integer = 0
                 end_of_week_date_integer = 0
                 try:
-                    end_of_week_date_integer = volunteer_weekly_metrics.end_of_week_date_integer
-                    date_last_updated_as_integer = volunteer_weekly_metrics.date_last_updated_as_integer
+                    if positive_value_exists(volunteer_weekly_metrics.end_of_week_date_integer):
+                        end_of_week_date_integer = volunteer_weekly_metrics.end_of_week_date_integer
+                    else:
+                        end_of_week_date_integer = 0
+                    if positive_value_exists(volunteer_weekly_metrics.date_last_updated_as_integer):
+                        date_last_updated_as_integer = volunteer_weekly_metrics.date_last_updated_as_integer
+                    else:
+                        date_last_updated_as_integer = 0
+                    both_positive_numbers = positive_value_exists(end_of_week_date_integer) and \
+                        positive_value_exists(date_last_updated_as_integer)
                 except Exception as e:
                     pass
 
-                if date_last_updated_as_integer > end_of_week_date_integer:
+                if both_positive_numbers and date_last_updated_as_integer > end_of_week_date_integer:
                     # No update needed because the last time it was updated was *after* the end of the
                     #  week we are tracking
                     week_already_fully_updated_count += 1
