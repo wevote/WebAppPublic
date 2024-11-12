@@ -604,6 +604,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     bulk_update_list = []
     update_or_create_count = 0
     updates_needed = False
+    week_already_fully_updated_count = 0
     for voter_we_vote_id in voter_we_vote_id_list:
         voter = voter_dict_by_voter_we_vote_id.get(voter_we_vote_id)
         # Now process new entries for this voter
@@ -615,11 +616,18 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
                     which_day_is_end_of_week=which_day_is_end_of_week)
             if voter_date_unique_string in volunteer_weekly_metrics_dict:
                 volunteer_weekly_metrics = volunteer_weekly_metrics_dict[voter_date_unique_string]
-                if volunteer_weekly_metrics.date_last_updated_as_integer > \
-                        volunteer_weekly_metrics.end_of_week_date_integer:
+                date_last_updated_as_integer = 0
+                end_of_week_date_integer = 0
+                try:
+                    end_of_week_date_integer = volunteer_weekly_metrics.end_of_week_date_integer
+                    date_last_updated_as_integer = volunteer_weekly_metrics.date_last_updated_as_integer
+                except Exception as e:
+                    pass
+
+                if date_last_updated_as_integer > end_of_week_date_integer:
                     # No update needed because the last time it was updated was *after* the end of the
                     #  week we are tracking
-                    pass
+                    week_already_fully_updated_count += 1
                 else:
                     # Since we have untracked data in the same week as the existing VolunteerWeeklyMetrics entry,
                     # just update the existing one, and then save the entries in bulk below.
@@ -668,9 +676,12 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
         'name': 'Looping through update_or_create_weekly_metrics_one_volunteer',
         'description':
             'unique_string_list count: {unique_string_list_count}, '
-            'update_or_create_count: {update_or_create_count}, {status}'.format(
+            'update_or_create_count: {update_or_create_count}, '
+            'week_already_fully_updated_count: {week_already_fully_updated_count}, '
+            '{status}'.format(
                 unique_string_list_count=len(unique_string_list),
                 update_or_create_count=update_or_create_count,
+                week_already_fully_updated_count=week_already_fully_updated_count,
                 status=status),
         'time_difference': t1 - t0,
     }
