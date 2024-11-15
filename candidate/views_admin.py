@@ -455,6 +455,16 @@ def candidate_list_view(request):
 
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
 
+    performance_dict = (request.GET.get('performance_dict', {}))
+    if not performance_dict:
+        performance_list = []
+        performance_dict = {
+            'candidate_list_view': performance_list,
+        }
+    else:
+        performance_dict = eval(performance_dict)
+        performance_list = performance_dict.get('candidate_list_view', [])
+
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
     #     location_of_page_variable = current_page_url.find("&page=")
@@ -1534,6 +1544,7 @@ def candidate_list_view(request):
         'next_page_url':                            next_page_url,
         'no_supporters':                            no_supporters,
         'previous_page_url':                        previous_page_url,
+        'performance_dict':                         performance_dict,
         'review_mode':                              review_mode,
         'show_all_elections':                       show_all_elections,
         'show_candidates_with_best_twitter_options':    show_candidates_with_best_twitter_options,
