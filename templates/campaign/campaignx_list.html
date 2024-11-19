@@ -111,7 +111,7 @@
 
 {% if campaignx_search %}
     <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}">
-         clear search</a>&nbsp;
+         <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
 {% endif %}
     <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
     <input type="submit" id="campaignx_search_submit" value="Search for Campaign" />
@@ -120,7 +120,7 @@
 
 {% if campaignx_list %}
     <div class="form-group pull-right">
-        <div class="col-xs-1">
+        <div class="col-xs-1" onclick={displayLoadingBanner()}>
             <input type="submit" name="save_changes" value="Save Changes" class="btn btn-primary" />
         </div>
     </div>
