@@ -7,9 +7,6 @@
                                top: 2px;
                                right: 2px;">&times;
     </span>
-<!--    <ul>-->
-<!--{{performance_dict}}-->
-<!--    </ul>-->
 
     <table class="table table-bordered">
         <thead>
@@ -41,12 +38,35 @@
                 {% endfor %}
             {% endfor %}
         </tbody>
+        <tbody id="secondTableBody">
+            {% if performance_process_dict %}
+                {% for view, stats in performance_process_dict.items %}
+                    <tr>
+                        <td colspan="3" style="font-weight: bold; text-align: left">
+                            View: {{ view }}
+                        </td>
+                    </tr>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.name }}</td>
+                            <td>{{ stat.time_difference|floatformat:4 }}</td>
+                            <td style="font-weight: 300; color: #666;">
+                                {{ stat.description }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No performance data available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
     </table>
-
 
     </div>
 
-<button id="SpeedStatisticsButton" class="toggle_button" style="padding: 10px 20px; border: 1px solid black; background-color: white; cursor: pointer;">
+<button id="SpeedStatisticsButton" class="toggle_button" style="padding: 10px 20px; border: 1px solid black; background-color: white; cursor: pointer; float: right; margin: 10px;">
     Speed Statistics
 </button>
 <script>
@@ -61,5 +81,56 @@
         document.getElementById('SpeedStatisticsPopup').style.display = 'none';
         document.getElementById('SpeedStatisticsButton').style.display = 'block';
     });
+
+     try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('performance_process_dict');
+        if (encodedData) {
+            const decodedData = JSON.parse(decodeURIComponent(encodedData));
+            console.log("Decoded performance_process_dict:", decodedData);
+
+            // Now populate the table using the decoded data
+            const tableBody = document.getElementById('secondTableBody'); // Get the table body where we want to append rows
+
+            // Clear the existing rows in the table
+            tableBody.innerHTML = '';
+
+            // Iterate over the performanceProcessDict and fill the table
+            Object.entries(decodedData).forEach(([view, stats]) => {
+                // Add a header row for the view
+                const viewRow = document.createElement('tr');
+                const viewCell = document.createElement('td');
+                viewCell.colSpan = 3;
+                viewCell.style.fontWeight = 'bold';
+                viewCell.style.textAlign = 'left';
+                viewCell.textContent = `View: ${view}`;
+                viewRow.appendChild(viewCell);
+                tableBody.appendChild(viewRow);
+
+                // Iterate over stats for the current view and add rows for each stat
+                stats.forEach(stat => {
+                    const statRow = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const timeDiffCell = document.createElement('td');
+                    const descCell = document.createElement('td');
+
+                    nameCell.textContent = stat.name || 'N/A';
+                    timeDiffCell.textContent = stat.time_difference.toFixed(4); // Format time to 4 decimal places
+                    descCell.textContent = stat.description || 'No description available';
+                    descCell.style.fontWeight = '300';
+                    descCell.style.color = '#666';
+
+                    statRow.appendChild(nameCell);
+                    statRow.appendChild(timeDiffCell);
+                    statRow.appendChild(descCell);
+                    tableBody.appendChild(statRow);
+                });
+            });
+        } else {
+            console.log("No performance_process_dict found in URL.");
+        }
+    } catch (error) {
+        console.error("Error parsing performance_process_dict from URL:", error);
+    }
 </script>
 </body>
