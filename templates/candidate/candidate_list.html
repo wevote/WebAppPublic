@@ -92,6 +92,7 @@
         {% if state_code != "" %}
 {#        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">#}
             <span class="u-link-color u-link-underline-on-hover" onClick={showAllStates("candidate_choose_election_id")}>show all states</span>
+        </a>
         {% endif %}
     {% endif %}{# End of if state_list #}
 </form>
