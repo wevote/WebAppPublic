@@ -53,8 +53,9 @@ def update_fast_load_db(host, voter_api_device_id, table_name, additional_record
                                         'voter_api_device_id': voter_api_device_id,
                                         })
 
+        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
         # print(response.request.url)
-        print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
 
@@ -276,8 +277,15 @@ def process_table_data(table_name, split_data):
         return 0
 
     # retrieve constraints from table
+    # Some unique_cols should not get dummy values, since these values are relied on as keys to other tables
+    do_not_touch = ['we_vote_id', 'voter_id', 'linked_campaignx_we_vote_id', 'linked_politician_we_vote_id',
+                    'organization_we_vote_id', 'google_civic_election_id']
     unique_constraints = inspector.get_unique_constraints(table_name)
     unique_cols = [con['column_names'][0] for con in unique_constraints]
+    unique_cols = [x for x in unique_cols if x not in do_not_touch]
+
+    # unique_cols = [con['column_names'][0] for (con in unique_constraints and con not in do_not_touch)]
+
     foreign_keys = inspector.get_foreign_keys(table_name)
     fk_cols = [col['constrained_columns'][0] for col in foreign_keys]
 
@@ -434,6 +442,7 @@ def get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id):
     dummy_cols.update(set(unique_cols) - dummy_cols)
     dummy_cols.update(set(not_null_id_cols) - dummy_cols)
     dummy_cols = list(dummy_cols)
+    # print('dummy_cols -------------------> ', dummy_cols)
 
     new_ids = np.arange(start_id, start_id + len(df))
 
