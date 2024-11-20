@@ -2504,6 +2504,7 @@ def organization_position_new_view(request, organization_id):
     if results['candidate_list_found']:
         candidates_for_this_election_list = results['candidate_list_objects']
 
+    print("Candidates for this election list:", candidates_for_this_election_list)
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureListManager()
     contest_measures_for_this_election_list = []
@@ -2515,6 +2516,8 @@ def organization_position_new_view(request, organization_id):
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
 
+    print("Measures for this election list:", contest_measures_for_this_election_list)
+    
     try:
         organization_position_query = PositionEntered.objects.order_by('stance')
         # As of Aug 2018 we are no longer using PERCENT_RATING
