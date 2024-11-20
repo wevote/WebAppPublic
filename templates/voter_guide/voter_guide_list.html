@@ -224,11 +224,9 @@
     <br />
     <script>
     function displayLoadingBanner() {
-        console.log("displayLoadingBanner triggered");
         document.getElementById('FilterPopupMessage').style.display = 'block';
     }
 
-    // Using jQuery to attach change events to checkboxes and select dropdowns
     $(function() {
         $('#show_all_elections_id').change(function() {
             displayLoadingBanner();
