@@ -7,30 +7,30 @@
 {% load template_filters %}
 
 <h1>Fast Load Data From We Vote Master Servers</h1>
-    <div style="padding: 25px 25px 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
-        If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and in about
-        fifty-two minutes (on a fast Mac), it will have loaded and stored all the election data we have for all elections and for all the states.
-        <br>
+<div style="padding: 25px 0 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
+    If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and in about
+    an hour (on a fast Mac), it will have loaded and stored all the election data we have for all elections and for all the states.
+    If you want to update to current election data, and don't care about overwriting your existing election data,
+    "FAST LOAD" is all you need.  The Python logging screen shows progress as the tables are loaded.
+    <br>
 
-        <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
-        <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
-        <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
-            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
-            <progress id="progress" value="0" max="100" style="display: none"></progress>
-            <div id="current_table"></div>
-            <div id="current_status"></div>
-            <div id="total_time"></div>
-            <div id="completion"></div>
-        </div>
-        If you want to update to current election data, and don't care about overwriting your existing election data,
-        "FAST LOAD" is all you need.  The Python logging screen shows progress as the tables are loaded.
-        <br><br>
-        If you are working with specific election data, and may have made local changes that you want to preserve, then the
-        "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big
-        state, or a national election.)
+    <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
+    <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
+    <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
+        <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
+        <progress id="progress" value="0" max="100" style="display: none"></progress>
+        <div id="current_table"></div>
+        <div id="current_status"></div>
+        <div id="total_time"></div>
+        <div id="completion"></div>
     </div>
-
-
+</div>
+<p style="padding-left:  25px;">
+    If you are working with specific election data, and may have made local changes that you want to preserve, then the
+    "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big
+    state, or a national election.)
+</p>
+<br>
 
 <h1>Sync Data With Master We Vote Servers</h1>
 
