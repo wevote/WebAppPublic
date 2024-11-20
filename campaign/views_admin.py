@@ -54,8 +54,10 @@ def campaign_delete_process_view(request):
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', 0)
     confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
 
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    state_code = request.POST.get('state_code', '')
+    google_civic_election_id = request.POST.get('google_civic_election_id', '')
+    campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.POST.get('campaignx_search', '')
+
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager', 'admin'}
@@ -68,7 +70,9 @@ def campaign_delete_process_view(request):
                              'Please check the checkbox to confirm you want to delete this organization.')
         return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx_we_vote_id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
+                                    "&campaignx_owner_organization_we_vote_id=" +
+                                    str(campaignx_owner_organization_we_vote_id) +
+                                    "&campaignx_search=" + str(campaignx_search))
 
     campaign_manager = CampaignXManager()
     results = campaign_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
@@ -80,8 +84,10 @@ def campaign_delete_process_view(request):
     else:
         messages.add_message(request, messages.ERROR, 'CampaignX not found.')
 
-    return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()))
-
+    return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                "?campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id) +
+                                "&campaignx_search=" + str(campaignx_search))
 
 @login_required
 def campaignx_duplicates_list_view(request):

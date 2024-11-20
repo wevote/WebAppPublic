@@ -320,7 +320,13 @@
   <br />
 <form action="{% url "campaign:campaignx_delete_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
-  <input type="hidden" name="campaignx_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+  <input type="hidden" name="campaignx_we_vote_id" 
+         value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+  <input type="hidden" name="google_civic_election_id" 
+         value="{{ campaignx.google_civic_election_id|default_if_none:''|default:''}}">
+  <input type="hidden" name="campaignx_owner_organization_we_vote_id" 
+         value="{{ campaignx_owner_organization_we_vote_id|default_if_none:''|default:'' }}">
+  <input type="hidden" name="campaignx_search" value="{{ campaignx_search|default_if_none:''|default:'' }}">
   <button type="submit" class="btn btn-danger">Delete Campaign</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <label for="confirm_delete_id">
     <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this campaign

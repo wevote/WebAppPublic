@@ -228,7 +228,21 @@
 <input type="submit" value="{% if measure %}Update Measure{% else %}Save New Measure{% endif %}" class="btn btn-primary" /></p>
 </form>
 
-
+{% if measure %}
+<form action="{% url "measure:measure_delete_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+  <input type="hidden" name="measure_id" value="{{ measure.id|default_if_none:0|default:0 }}">
+  <input type="hidden" name="google_civic_election_id" 
+         value="{{ measure.google_civic_election_id|default_if_none:0|default:0 }}">
+  <input type="hidden" name="state_code" value="{{ measure.state_code|default_if_none:''|default:'' }}">
+  <button type="submit" class="btn btn-danger">Delete Measure</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <label for="confirm_delete_id">
+    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> 
+      Check to confirm that you want to permanently delete this measure
+  </label>
+</form>
+  <br />
+{% endif %}
 
 
 {% if measure_list %}

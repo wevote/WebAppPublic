@@ -36,6 +36,43 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+@login_required
+def measure_delete_process_view(request):
+    """
+    Delete a measure
+    :param request:
+    :return:
+    """
+
+    measure_id = convert_to_int(request.POST.get('measure_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    state_code = request.POST.get('state_code', '')
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this Measure. '
+                             'Please check the checkbox to confirm you want to delete this measure.')
+        return HttpResponseRedirect(reverse('measure:measure_edit', args=(measure_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_measure_manager = ContestMeasureManager()
+    results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id=measure_id)
+    if results['contest_measure_found']:
+        contest_measure = results['contest_measure']
+        contest_measure.delete()
+        messages.add_message(request, messages.INFO, 'Measure deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Measure not found.')
+
+    return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
 
 @login_required
 def compare_two_measures_for_merge_view(request):
