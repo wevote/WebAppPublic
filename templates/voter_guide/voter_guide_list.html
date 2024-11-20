@@ -223,9 +223,8 @@
     <br />
     <br />
     <script>
-    
     function displayLoadingBanner() {
-    document.getElementById('FilterPopupMessage').style.display = 'block';
+        document.getElementById('FilterPopupMessage').style.display = 'block';
     }
 
     $(function() {
@@ -233,23 +232,23 @@
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_individuals_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_statistics_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#google_civic_election_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
+        });
+        $('form[name="voter_guide_choose_election"]').submit(function(event) {
+            displayLoadingBanner();
         });
     });
     </script>
