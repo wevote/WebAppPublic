@@ -1317,10 +1317,15 @@ def candidate_list_view(request):
             # datetime_now = timezone.localize(datetime.now())
             timezone, datetime_now = generate_localized_datetime_from_obj()
             if positive_value_exists(election.election_day_text):
-                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD)) # "%Y-%m-%d"
-                if date_of_election > datetime_now:
-                    time_until_election = date_of_election - datetime_now
-                    election.days_until_election = convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days) # "%d"
+                try:
+                    date_of_election = \
+                        timezone.localize(datetime.strptime(election.election_day_text, DATE_FORMAT_YMD))  # "%Y-%m-%d"
+                    if date_of_election > datetime_now:
+                        time_until_election = date_of_election - datetime_now
+                        election.days_until_election = \
+                            convert_to_int(DATE_FORMAT_DAY_TWO_DIGIT % time_until_election.days)  # "%d"
+                except Exception as e:
+                    pass
 
             # How many offices?
             office_list_query = ContestOffice.objects.using('readonly').all()
@@ -2266,25 +2271,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         performance_dict = eval(performance_dict)  # Keep existing data
         performance_list = performance_dict.get('candidate_edit_view', [])
 
-    # performance_snapshot["candidate_edit_process_view(request)"] = "took {:.6f} seconds, ".format(
-    #     time_difference1)
-
-    # performance_snapshot1 = {
-    #     'name': 'Candidate_edit_view in views_admin.py',
-    #     'description': 'Retrieve candidate from database to edit/update',
-    #     'time_difference': time_difference1,
-    # }
-    # performance_list.append(performance_snapshot1)
-
-    # performance_snapshot_candidateEditView = {
-    #     'name': 'CandidateEditView',
-    #     'description': 'Retrieve candidate from database to edit/update',
-    #     'time_difference': timeDifferenceCandidateEditView,
-    # }
-    # performance_list.append(performance_snapshot_candidateEditView)
-
     try:
-
         if positive_value_exists(candidate_id):
             candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         else:

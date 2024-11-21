@@ -2,6 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from datetime import date, timedelta
+from django.utils.timezone import now
+from time import time
 from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, \
     VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED, \
     VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS, \
@@ -245,7 +247,7 @@ def changes_which_count_found(changes_found_dict={}, changes_which_count=[]):
     return False
 
 
-def update_or_create_weekly_metrics_one_volunteer(
+def create_updates_dict_for_volunteer_weekly_metrics(
         end_of_week_date_integer=None,
         start_of_week_date_integer=None,
         volunteer_task_completed_list=None,
@@ -267,8 +269,6 @@ def update_or_create_weekly_metrics_one_volunteer(
     twitter_bulk_retrieve = 0               # VOLUNTEER_ACTION_PHOTO_BULK_RETRIEVE = 12
     voter_guide_possibilities_created = 0   # VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
 
-    volunteer_weekly_metrics = None
-    volunteer_weekly_metrics_saved = False
     status = ""
     success = True
 
@@ -296,10 +296,10 @@ def update_or_create_weekly_metrics_one_volunteer(
     if missing_required_variable:
         success = False
         results = {
-            'success':                          success,
-            'status':                           status,
-            'volunteer_weekly_metrics_saved':   volunteer_weekly_metrics_saved,
-            'volunteer_weekly_metrics':         volunteer_weekly_metrics,
+            'missing_required_variable':    missing_required_variable,
+            'success':                      success,
+            'status':                       status,
+            'updates_dict':                 {},
         }
         return results
 
@@ -334,10 +334,13 @@ def update_or_create_weekly_metrics_one_volunteer(
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
                     voter_guide_possibilities_created += 1
 
+    yesterday = now() - timedelta(days=1)
+    date_last_updated_as_integer = convert_date_to_date_as_integer(yesterday)
     voter_date_unique_string = \
-        str(voter_we_vote_id) + "-" + str(end_of_week_date_integer) + "-" + str(which_day_is_end_of_week)
-    updates = {
+        generate_voter_date_unique_string(voter_we_vote_id, end_of_week_date_integer, which_day_is_end_of_week)
+    updates_dict = {
         'candidates_created':                   candidates_created,
+        'date_last_updated_as_integer':         date_last_updated_as_integer,
         'duplicate_politician_analysis':        duplicate_politician_analysis,
         'election_retrieve_started':            election_retrieve_started,
         'match_candidates_to_politicians':      match_candidates_to_politicians,
@@ -355,10 +358,60 @@ def update_or_create_weekly_metrics_one_volunteer(
         'voter_we_vote_id':                     voter_we_vote_id,
         'which_day_is_end_of_week':             which_day_is_end_of_week,
     }
+
+    results = {
+        'missing_required_variable':    missing_required_variable,
+        'success':                      success,
+        'status':                       status,
+        'updates_dict':                 updates_dict,
+    }
+    return results
+
+
+def update_or_create_weekly_metrics_one_volunteer(
+        end_of_week_date_integer=None,
+        updates_dict={},
+        voter=None,
+        voter_we_vote_id=None,
+        which_day_is_end_of_week=6):
+
+    volunteer_weekly_metrics = None
+    volunteer_weekly_metrics_saved = False
+    status = ""
+    success = True
+
+    if hasattr(voter, 'we_vote_id'):
+        voter_we_vote_id = voter.we_vote_id
+
+    missing_required_variable = False
+    if not positive_value_exists(end_of_week_date_integer):
+        status += 'MISSING_END_OF_WEEK_DATE_INTEGER '
+        missing_required_variable = True
+    if not positive_value_exists(voter_we_vote_id):
+        status += 'MISSING_VOTER_WE_VOTE_ID '
+        missing_required_variable = True
+    if which_day_is_end_of_week not in [0, 1, 2, 3, 4, 5, 6]:
+        status += 'MISSING_WEEKDAY '
+        missing_required_variable = True
+
+    if missing_required_variable:
+        success = False
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'volunteer_weekly_metrics_saved':   volunteer_weekly_metrics_saved,
+            'volunteer_weekly_metrics':         volunteer_weekly_metrics,
+        }
+        return results
+
+    yesterday = now() - timedelta(days=1)
+    date_last_updated_as_integer = convert_date_to_date_as_integer(yesterday)
+    voter_date_unique_string = \
+        generate_voter_date_unique_string(voter_we_vote_id, end_of_week_date_integer, which_day_is_end_of_week)
     try:
         volunteer_weekly_metrics = VolunteerWeeklyMetrics.objects.using('analytics').update_or_create(
             voter_date_unique_string=voter_date_unique_string,
-            defaults=updates,
+            defaults=updates_dict,
         )
         volunteer_weekly_metrics_saved = True
         status += 'WEEKLY_METRICS_SAVED '
@@ -373,6 +426,13 @@ def update_or_create_weekly_metrics_one_volunteer(
         'volunteer_weekly_metrics':         volunteer_weekly_metrics,
     }
     return results
+
+
+def generate_voter_date_unique_string(
+        voter_we_vote_id='',
+        end_of_week_date_integer=0,
+        which_day_is_end_of_week=6):
+    return str(voter_we_vote_id) + "-" + str(end_of_week_date_integer) + "-" + str(which_day_is_end_of_week)
 
 
 def get_key_from_value(val, my_dict):
@@ -417,6 +477,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     which_day_is_start_of_week = get_start_of_week_weekday_from_end_of_week_weekday(which_day_is_end_of_week)
     status = ""
     success = True
+    performance_list = []
     task_list = []
 
     if positive_value_exists(recalculate_all):
@@ -446,6 +507,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
         earliest_start_of_week_integer = 0
         status += "ERROR_RETRIEVING_EARLIEST_START_OF_WEEK_DATE2: " + str(e) + ' '
 
+    t0 = time()
     try:
         queryset = VolunteerTaskCompleted.objects.using('readonly').all()  # 'analytics'
         # We have to process an entire week of task metrics if we last processed within the week.
@@ -456,6 +518,13 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
         success = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'VolunteerTaskCompleted retrieve from date_as_integer',
+        'description': '',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # Break up the results by voter_we_vote_id
     earliest_date_integer = 99991201  # Temp date far in the future, meant to be replaced immediately below
@@ -480,6 +549,7 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     start_and_end_of_week_date_integer_list = results['start_and_end_of_week_date_integer_list']
 
     voter_list = []
+    t0 = time()
     try:
         queryset = Voter.objects.using('readonly').all()
         queryset = queryset.filter(we_vote_id__in=voter_we_vote_id_list)
@@ -487,24 +557,171 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
     except Exception as e:
         status += "ERROR_RETRIEVING_VOTER_LIST: " + str(e) + ' '
         success = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Voter retrieve from voter_we_vote_id_list',
+        'description': '',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     voter_dict_by_voter_we_vote_id = {}
     for voter in voter_list:
         voter_dict_by_voter_we_vote_id[voter.we_vote_id] = voter
 
+    t0 = time()
     all_voters_updated_successfully = True
+    unique_string_list = []
+    # Retrieve all entries for this voter with a single query, and use some logic to see if we can skip saving/updating
+    #  Start by figuring out the unique identifiers for entries we need to create (if they don't already exist)
+    for voter_we_vote_id in voter_we_vote_id_list:
+        for start_and_end_of_week_dict in start_and_end_of_week_date_integer_list:
+            voter_date_unique_string = \
+                generate_voter_date_unique_string(
+                    voter_we_vote_id=voter_we_vote_id,
+                    end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                    which_day_is_end_of_week=which_day_is_end_of_week)
+            unique_string_list.append(voter_date_unique_string)
+
+    # Take the list of unique identifiers, and retrieve them with a single query if they already exist.
+    today = now()
+    today_as_integer = convert_date_to_date_as_integer(today)
+    volunteer_weekly_metrics_dict = {}
+    try:
+        queryset = VolunteerWeeklyMetrics.objects.using('analytics').all()
+        queryset = queryset.filter(voter_date_unique_string__in=unique_string_list)
+        volunteer_weekly_metrics_list = list(queryset)
+        for volunteer_weekly_metrics in volunteer_weekly_metrics_list:
+            voter_date_unique_string = \
+                generate_voter_date_unique_string(
+                    voter_we_vote_id=volunteer_weekly_metrics.voter_we_vote_id,
+                    end_of_week_date_integer=volunteer_weekly_metrics.end_of_week_date_integer,
+                    which_day_is_end_of_week=volunteer_weekly_metrics.which_day_is_end_of_week)
+            volunteer_weekly_metrics_dict[voter_date_unique_string] = volunteer_weekly_metrics
+    except Exception as e:
+        status += "ERROR_RETRIEVING_FROM_DATABASE: " + str(e) + " "
+
+    bulk_update_list = []
+    update_or_create_count = 0
+    updates_needed = False
+    week_already_fully_updated_count = 0
     for voter_we_vote_id in voter_we_vote_id_list:
         voter = voter_dict_by_voter_we_vote_id.get(voter_we_vote_id)
+        # Now process new entries for this voter
         for start_and_end_of_week_dict in start_and_end_of_week_date_integer_list:
-            results = update_or_create_weekly_metrics_one_volunteer(
-                end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
-                start_of_week_date_integer=start_and_end_of_week_dict['start_of_week_date_integer'],
-                volunteer_task_completed_list=tasks_by_voter_we_vote_id[voter_we_vote_id],
-                voter=voter,
-                which_day_is_end_of_week=which_day_is_end_of_week,
-            )
-            if not results['success']:
-                all_voters_updated_successfully = False
+            voter_date_unique_string = \
+                generate_voter_date_unique_string(
+                    voter_we_vote_id=voter_we_vote_id,
+                    end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                    which_day_is_end_of_week=which_day_is_end_of_week)
+            if voter_date_unique_string in volunteer_weekly_metrics_dict:
+                volunteer_weekly_metrics = volunteer_weekly_metrics_dict[voter_date_unique_string]
+                both_positive_numbers = False
+                date_last_updated_as_integer = 0
+                end_of_week_date_integer = 0
+                try:
+                    if positive_value_exists(volunteer_weekly_metrics.end_of_week_date_integer):
+                        end_of_week_date_integer = volunteer_weekly_metrics.end_of_week_date_integer
+                    else:
+                        end_of_week_date_integer = 0
+                    if positive_value_exists(volunteer_weekly_metrics.date_last_updated_as_integer):
+                        date_last_updated_as_integer = volunteer_weekly_metrics.date_last_updated_as_integer
+                    else:
+                        date_last_updated_as_integer = 0
+                    both_positive_numbers = positive_value_exists(end_of_week_date_integer) and \
+                        positive_value_exists(date_last_updated_as_integer)
+                except Exception as e:
+                    pass
+
+                if both_positive_numbers and date_last_updated_as_integer > end_of_week_date_integer:
+                    # No update needed because the last time it was updated was *after* the end of the
+                    #  week we are tracking
+                    week_already_fully_updated_count += 1
+                else:
+                    # Since we have untracked data in the same week as the existing VolunteerWeeklyMetrics entry,
+                    # just update the existing one, and then save the entries in bulk below.
+                    updates_results = create_updates_dict_for_volunteer_weekly_metrics(
+                        end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                        start_of_week_date_integer=start_and_end_of_week_dict['start_of_week_date_integer'],
+                        volunteer_task_completed_list=tasks_by_voter_we_vote_id[voter_we_vote_id],
+                        voter=voter,
+                        which_day_is_end_of_week=which_day_is_end_of_week,
+                    )
+                    if updates_results['success']:
+                        defaults = updates_results['updates_dict']
+                        try:
+                            for field_name in defaults.keys():
+                                setattr(volunteer_weekly_metrics, field_name, defaults[field_name])
+                            bulk_update_list.append(volunteer_weekly_metrics)
+                            updates_needed = True
+                        except Exception as e:
+                            status += "ERROR_UPDATING_VOLUNTER_WEEKLY_METRICS: " + str(e) + " "
+                            all_voters_updated_successfully = False
+                    else:
+                        all_voters_updated_successfully = False
+            else:
+                updates_results = create_updates_dict_for_volunteer_weekly_metrics(
+                    end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                    start_of_week_date_integer=start_and_end_of_week_dict['start_of_week_date_integer'],
+                    volunteer_task_completed_list=tasks_by_voter_we_vote_id[voter_we_vote_id],
+                    voter=voter,
+                    which_day_is_end_of_week=which_day_is_end_of_week,
+                )
+                if updates_results['success']:
+                    updates_dict = updates_results['updates_dict']
+                    results = update_or_create_weekly_metrics_one_volunteer(
+                        end_of_week_date_integer=start_and_end_of_week_dict['end_of_week_date_integer'],
+                        updates_dict=updates_dict,
+                        voter=voter,
+                        which_day_is_end_of_week=which_day_is_end_of_week,
+                    )
+                    update_or_create_count += 1
+                    if not results['success']:
+                        all_voters_updated_successfully = False
+                else:
+                    all_voters_updated_successfully = False
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Looping through update_or_create_weekly_metrics_one_volunteer',
+        'description':
+            'unique_string_list count: {unique_string_list_count}, '
+            'update_or_create_count: {update_or_create_count}, '
+            'week_already_fully_updated_count: {week_already_fully_updated_count}, '
+            '{status}'.format(
+                unique_string_list_count=len(unique_string_list),
+                update_or_create_count=update_or_create_count,
+                week_already_fully_updated_count=week_already_fully_updated_count,
+                status=status),
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
+
+    if updates_needed:
+        t0 = time()
+        try:
+            update_count = VolunteerWeeklyMetrics.objects.bulk_update(
+                bulk_update_list,
+                [
+                    'candidates_created', 'date_last_updated_as_integer', 'duplicate_politician_analysis',
+                    'election_retrieve_started', 'match_candidates_to_politicians', 'end_of_week_date_integer',
+                    'politicians_augmented', 'politicians_deduplicated', 'politicians_photo_added',
+                    'politicians_requested_changes', 'positions_saved', 'position_comments_saved',
+                    'twitter_bulk_retrieve', 'voter_date_unique_string', 'voter_display_name',
+                    'voter_guide_possibilities_created', 'voter_we_vote_id', 'which_day_is_end_of_week',
+                ])
+            status += \
+                "{update_count:,} VolunteerWeeklyMetrics entries saved with bulk_update. " \
+                "".format(update_count=update_count)
+        except Exception as e:
+            status += "ERROR with VolunteerWeeklyMetrics.objects.bulk_update: {e}, ".format(e=e)
+            success = False
+        t1 = time()
+        performance_snapshot = {
+            'name': 'VolunteerWeeklyMetrics bulk_update_list save',
+            'description': '{status}'.format(status=status),
+            'time_difference': t1 - t0,
+        }
+        performance_list.append(performance_snapshot)
 
     # We keep calculating the last week to deal with teams with different end_of_week days
     week_ago_integer = 0
@@ -523,7 +740,8 @@ def update_weekly_volunteer_metrics(which_day_is_end_of_week=6, recalculate_all=
             success = False
 
     results = {
-        'status':                           status,
-        'success':                          success,
+        'performance_list': performance_list,
+        'status':           status,
+        'success':          success,
     }
     return results

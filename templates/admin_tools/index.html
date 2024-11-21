@@ -21,7 +21,11 @@
     {# ################## #}
 <h2>Analytics</h2>
 
-<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
+<p>
+    <a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a>&nbsp;&nbsp;&nbsp;
+    <a href="{% url 'import_export_bigquery:import_export_bigquery_index' %}">BigQuery Tools</a>&nbsp;&nbsp;&nbsp;
+    <a href="{% url 'import_export_openreplay:import_export_openreplay_index' %}">OpenReplay Tools</a>
+</p>
 
 <p>
     <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
@@ -34,7 +38,7 @@
         target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
     (aggregate voter usage)
 </p>
-<p><a href="{% url 'volunteer_task:performance_list' %}"
+<p><a href="{% url 'volunteer_task:scoreboard_list' %}"
         target="_blank">Scoreboard: Volunteer Tasks Completed <span class="glyphicon glyphicon-new-window"></span></a>
 </p>
 <p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>

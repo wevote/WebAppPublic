@@ -129,6 +129,13 @@
   "OPEN_PEOPLE_USERNAME":           "",
   "OPEN_PEOPLE_PASSWORD":           "",
 
+  "_comment":                       "import_export_openreplay",
+  "OPENREPLAY_BASE_URL":            "https://openreplay.wevote.us/api/vi/",
+  "OPENREPLAY_PROJECT_KEY":         "",
+  "OPENREPLAY_ORGANIZATION_KEY":    "",
+  "OPENREPLAY_USERNAME":            "",
+  "OPENREPLAY_PASSWORD":            "",
+
   "_comment":                       "Scheduled Tasks, Retain History of completed tasks for n days",
   "SCHEDULED_TASKS_RETAIN_HISTORY": 90,
 
@@ -157,6 +164,7 @@
   "_comment-MOBILE_PHONE_BYPASS":   "Use this test phone number and code when creating automated tests",
   "BYPASS_SMS_PHONE_NUMBER_FOR_AUTOMATION":       "+1 808-935-8555",
   "BYPASS_EMAIL_FOR_AUTOMATION":     "bypass@fake.org",
+  "BYPASS_EMAIL_FOR_DELETE_AUTOMATION":     "delete@fake.org",
   "SOCIAL_AUTH_SMS_BYPASS":         "123456",
   "SOCIAL_AUTH_TWITTER_KEY":        "<This is Twitter's `Consumer Key`>",
   "SOCIAL_AUTH_TWITTER_SECRET":     "<This is Twitter's `Consumer Secret`>",

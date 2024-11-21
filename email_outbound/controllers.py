@@ -24,6 +24,7 @@ SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY", no_exception=Tru
 SENDGRID_EMAIL_VALIDATION_URL = "https://api.sendgrid.com/v3/"
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 BYPASS_EMAIL_FOR_AUTOMATION = get_environment_variable("BYPASS_EMAIL_FOR_AUTOMATION", no_exception=True)
+BYPASS_EMAIL_FOR_DELETE_AUTOMATION = get_environment_variable("BYPASS_EMAIL_FOR_DELETE_AUTOMATION", no_exception=True)
 
 def augment_email_address_list(email_address_list, voter):
     email_address_list_augmented = []
@@ -2481,7 +2482,12 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
     bypass_email_for_automation = BYPASS_EMAIL_FOR_AUTOMATION
     if not positive_value_exists(bypass_email_for_automation):
         bypass_email_for_automation = 'bypass@fake.org'
-    cordova_review_bypass = text_for_email_address == bypass_email_for_automation
+    bypass_email_for_delete_automation = BYPASS_EMAIL_FOR_DELETE_AUTOMATION
+    if not positive_value_exists(bypass_email_for_delete_automation):
+        bypass_email_for_delete_automation = 'delete@fake.org'
+    cordova_review_bypass = \
+        text_for_email_address == bypass_email_for_automation or \
+        text_for_email_address == bypass_email_for_delete_automation
     results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id, cordova_review_bypass)
     secret_code = results['secret_code']
     secret_code_system_locked_for_this_voter_device_id = \

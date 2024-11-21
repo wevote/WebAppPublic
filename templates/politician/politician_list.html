@@ -19,9 +19,14 @@
                         target="_blank" >
             Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
         </li>
-        <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li>
+            <a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
+               target="_blank" >
+                Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)
+            &nbsp;&nbsp;
+            <a href="{% url 'politician:update_ultimate_election_date_from_candidates' %}?state_code={{ state_code }}" >
+                Update Politician Ultimate Election Dates</a>
+        </li>
 
 {# # 2024-05-15: Causing problems on live servers #}
 {#        <li><a href="{% url 'politician:update_recommended_politicians' %}?state_code={{ state_code }}"#}
@@ -58,14 +63,14 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&show_all={{ show_all }}&show_politicians_with_email={{ show_politicians_with_email }}">
-            show all states</a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
+            <span onclick={displayLoadingBanner()}>show all states</span></a>&nbsp;&nbsp;&nbsp;
         {% endif %}
     {% endif %}{# End of if state_list #}
 
     {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&show_all={{ show_all }}&show_politicians_with_email={{ show_politicians_with_email }}">
-         clear search</a>&nbsp;
+    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
+         <span onclick={displayLoadingBanner()}>clear search</span></a>&nbsp;
     {% endif %}
     <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
     <input id="politician_search_submit" type="submit" value="Search for Politician" />
@@ -98,6 +103,21 @@
     <label for="organization_manual_intervention_needed_id">
       <input type="checkbox" name="organization_manual_intervention_needed" id="organization_manual_intervention_needed_id" value="1"
              {% if organization_manual_intervention_needed %}checked{% endif %} /> Org intervention needed
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="hide_politicians_with_photos_id">
+      <input type="checkbox" name="hide_politicians_with_photos" id="hide_politicians_with_photos_id" value="1"
+             {% if hide_politicians_with_photos %}checked{% endif %} /> Missing Photo
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="was_candidate_recently_id">
+      <input type="checkbox" name="was_candidate_recently" id="was_candidate_recently_id" value="1"
+             {% if was_candidate_recently %}checked{% endif %} /> Was Candidate Recently
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="exclude_politician_analysis_done_id">
+      <input type="checkbox" name="exclude_politician_analysis_done" id="exclude_politician_analysis_done_id" value="1"
+             {% if exclude_politician_analysis_done %}checked{% endif %} /> Exclude Analyzed
     </label>
 </form>
 
@@ -241,6 +261,18 @@
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
         $(function() {
+            $('#exclude_politician_analysis_done_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#hide_politicians_with_photos_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+        });
+        $(function() {
             $('#organization_manual_intervention_needed_id').change(function() {
                 displayLoadingBanner();
                 this.form.submit();
@@ -284,6 +316,12 @@
         });
         $(function() {
             $('#politician_search_submit').click(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#was_candidate_recently_id').change(function() {
                 displayLoadingBanner();
                 this.form.submit();
             });

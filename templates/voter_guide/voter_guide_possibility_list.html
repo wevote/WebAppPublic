@@ -4,6 +4,7 @@
 {% block title %}Endorsement Websites{% endblock %}
 
 {% block content %}
+{% include "admin_tools/loading_banner.html" %}
 {% load template_filters %}
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -21,7 +22,7 @@
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">Suggest an Endorsement Website <span class="glyphicon glyphicon-new-window"></span></a></strong>
         Quick public tools that feeds into import_export_batch system.</li>
-    <li><strong><a href="{% url 'volunteer_task:performance_list' %}"
+    <li><strong><a href="{% url 'volunteer_task:scoreboard_list' %}"
                    target="_blank">Scoreboard <span class="glyphicon glyphicon-new-window"></span></a></strong>
         Tasks completed by the political data team, person-by-person.</li>
     <li><strong><a href="{% url 'voter_guide:create_possible_voter_guides_from_prior_elections' %}?google_civic_election_id={{ google_civic_election_id }}">
@@ -87,7 +88,7 @@
     {# Return to see voter guides to review #}
     <span class="mdl-chip{% if filter_selected_to_review %} mdl-color--grey{% endif %}" {% if filter_selected_to_review %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_to_review %}color: #fff;{% endif %}">
                 To Review
                   ({{ to_review_count }})
@@ -99,7 +100,7 @@
     {# Show voter guides suggested from prior elections #}
     <span class="mdl-chip{% if filter_selected_from_prior_election %} mdl-color--grey{% endif %}" {% if filter_selected_from_prior_election %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_from_prior_election=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_from_prior_election=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_from_prior_election %}color: #fff;{% endif %}">
                   Past Year
                   ({{ from_prior_election_count }})
@@ -111,7 +112,7 @@
     {# Show voter guides where we previously couldn't find endorsements #}
     <span class="mdl-chip{% if filter_selected_not_available_yet %} mdl-color--grey{% endif %}" {% if filter_selected_not_available_yet %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_not_available_yet=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_not_available_yet=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_not_available_yet %}color: #fff;{% endif %}">
               Not Available Yet
               ({{ not_available_yet_count }})
@@ -123,7 +124,7 @@
     {# Show voter guides where we don't have the matching candidates or measures in our database #}
     <span class="mdl-chip{% if filter_selected_candidates_missing %} mdl-color--grey{% endif %}" {% if filter_selected_candidates_missing %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_candidates_missing=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_candidates_missing=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_candidates_missing %}color: #fff;{% endif %}">
                   Candidates Missing
                   ({{ candidates_missing_count }})
@@ -135,7 +136,7 @@
     {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
     <span class="mdl-chip{% if filter_selected_capture_detailed_comments %} mdl-color--grey{% endif %}" {% if filter_selected_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_capture_detailed_comments=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_capture_detailed_comments=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_capture_detailed_comments %}color: #fff;{% endif %}">
               Capture Comments
               ({{ capture_detailed_comments_count }})
@@ -148,7 +149,7 @@
     {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
     <span class="mdl-chip{% if filter_selected_done_needs_verification %} mdl-color--grey{% endif %}" {% if filter_selected_done_needs_verification %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_needs_verification=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_needs_verification=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_done_needs_verification %}color: #fff;{% endif %}">
               Done-To Verify
               ({{ done_needs_verification_count }})
@@ -159,7 +160,7 @@
     {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
     <span class="mdl-chip{% if filter_selected_done_verified %} mdl-color--grey{% endif %}" {% if filter_selected_done_verified %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_verified=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_done_verified=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_done_verified %}color: #fff;{% endif %}">
               Done-Verified
               ({{ done_verified_count }})
@@ -170,7 +171,7 @@
     {# Return to see voter guides to review #}
     <span class="mdl-chip{% if filter_selected_archive %} mdl-color--grey{% endif %}" {% if filter_selected_archive %} style="font-weight: bold;"{% endif %}>
        <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_archive=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_archive=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_archive %}color: #fff;{% endif %}">
               Archived
               </span>
@@ -181,7 +182,7 @@
     {# Show voter guides where we ignore the source #}
     <span class="mdl-chip{% if filter_selected_ignore %} mdl-color--grey{% endif %}" {% if filter_selected_ignore %} style="font-weight: bold;"{% endif %}>
         <span class="mdl-chip__text">
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_ignore=1">
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&assigned_to_voter_we_vote_id={{ assigned_to_voter_we_vote_id }}&filter_selected_ignore=1" onclick="displayLoadingBanner()">
               <span style="{% if filter_selected_ignore %}color: #fff;{% endif %}">
                 Ignored
               </span>
@@ -248,7 +249,7 @@
             </select>
         </div>
         <div class="col-xs-1">
-            <input type="submit" value="Save" class="btn btn-primary" />
+            <input type="submit" value="Save" class="btn btn-primary"/>
         </div>
     </div>
 
@@ -290,23 +291,30 @@
     <br />
     <br />
     <script>
+    function displayLoadingBanner() {
+        document.getElementById('FilterPopupMessage').style.display ='block';
+    };
     $(function() {
         $('#assigned_to_voter_we_vote_id_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#google_civic_election_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });
     $(function() {
         $('#show_number_of_ballot_items_id').change(function() {
+            displayLoadingBanner()
             this.form.submit();
         });
     });

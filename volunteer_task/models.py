@@ -195,6 +195,7 @@ class VolunteerWeeklyMetrics(models.Model):
     #  And this end-of-week date is Sunday from ISO 8601 Standard
     end_of_week_date_integer = models.PositiveIntegerField(null=True, db_index=True)
     candidates_created = models.PositiveIntegerField(default=0)
+    date_last_updated_as_integer = models.PositiveIntegerField(null=True)
     duplicate_politician_analysis = models.PositiveIntegerField(default=0)
     election_retrieve_started = models.PositiveIntegerField(default=0)
     match_candidates_to_politicians = models.PositiveIntegerField(default=0)
@@ -205,13 +206,23 @@ class VolunteerWeeklyMetrics(models.Model):
     positions_saved = models.PositiveIntegerField(default=0)
     position_comments_saved = models.PositiveIntegerField(default=0)
     twitter_bulk_retrieve = models.PositiveIntegerField(default=0)
-    # We create this unique identifier to we can prevent duplicates: voter_we_vote_id + "-" + end_of_week_date_integer
-    voter_date_unique_string = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    # We create this unique identifier to we can prevent duplicates. See: generate_voter_date_unique_string
+    voter_date_unique_string = models.CharField(max_length=255, null=True, unique=True)
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
     voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
-    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, null=True)
     # For teams that meet on Friday, we want Thursday to be the end-of-week. Note Monday is 0 and Sunday is 6
-    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False, db_index=True)
+    which_day_is_end_of_week = models.PositiveIntegerField(default=6, null=False)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['voter_we_vote_id', 'which_day_is_end_of_week', 'end_of_week_date_integer'],
+                name='vol_weekly_index'),
+            models.Index(
+                fields=['voter_date_unique_string'],
+                name='voter_date_unique_string'),
+        ]
 
 
 def display_action_constant_human_readable(action_constant):

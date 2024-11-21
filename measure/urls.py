@@ -23,4 +23,5 @@ urlpatterns = [
     re_path(r'^(?P<measure_we_vote_id>wv[\w]{2}meas[\w]+)/edit/$',
         views_admin.measure_edit_view, name='measure_edit_we_vote_id'),
     re_path(r'^(?P<measure_id>[0-9]+)/summary/$', views_admin.measure_summary_view, name='measure_summary'),
+    re_path(r'^delete_process/$', views_admin.measure_delete_process_view, name='measure_delete_process'),
 ]
