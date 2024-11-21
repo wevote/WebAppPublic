@@ -2226,6 +2226,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     maplight_id = request.GET.get('maplight_id', False)
     page = request.GET.get('page', 0)
     performance_dict = (request.GET.get('performance_dict', {}))
+    performance_process_dict = (request.GET.get('performance_process_dict', {}))
     state_code = request.GET.get('state_code', "")
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
     show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
@@ -2245,10 +2246,17 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     politician_we_vote_id = ''
     seo_friendly_path = ''
     status = ''
-    t0 = time()
+    # t0 = time()
     # candidate_edit_process_view(request)
-    t1 = time()
-    timeDifferenceCandidateEditView = t1 - t0
+    # t1 = time()
+    # timeDifferenceCandidateEditView = t1 - t0
+
+    if isinstance(performance_process_dict, str):  # Only parse if it's a string
+        try:
+            performance_process_dict = json.loads(performance_process_dict)
+        except json.JSONDecodeError:
+            performance_process_dict = {}  # Fallback to an empty dict if parsing fails
+
     if not performance_dict:
         performance_list = []
         performance_dict = {
@@ -2268,14 +2276,12 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     # }
     # performance_list.append(performance_snapshot1)
 
-    performance_snapshot_candidateEditView = {
-        'name': 'CandidateEditView',
-        'description': 'Retrieve candidate from database to edit/update',
-        'time_difference': timeDifferenceCandidateEditView,
-    }
-    performance_list.append(performance_snapshot_candidateEditView)
-
-
+    # performance_snapshot_candidateEditView = {
+    #     'name': 'CandidateEditView',
+    #     'description': 'Retrieve candidate from database to edit/update',
+    #     'time_difference': timeDifferenceCandidateEditView,
+    # }
+    # performance_list.append(performance_snapshot_candidateEditView)
 
     try:
 
@@ -2346,7 +2352,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 performance_snapshot = {
                     'name': 'PoliticianSEOFriendlyPathRetrieve',
                     'description': 'Query Politician SEO Friendly Path and filter on politician_wevote_id',
-                    'time_difference': t1 - t0
+                    'time_difference': t3 - t2,
                 }
                 performance_list.append(performance_snapshot)
 
@@ -2697,6 +2703,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'path_count':                       path_count,
             'path_list':                        path_list,
             'performance_dict':                 performance_dict,
+            'performance_process_dict':         performance_process_dict,
             'rating_list':                      rating_list,
             'related_candidate_list':           related_candidate_list,
             'state_code':                       state_code,
@@ -2749,13 +2756,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'vote_smart_id':        vote_smart_id,
             'web_app_root_url':     web_app_root_url,
         }
-
-    performance_summary_dict = {
-        'view_name': 'candidate_edit',
-        'performance_list': performance_list,
-    }
-
-    # print(performance_summary_dict)
 
     return render(request, 'candidate/candidate_edit.html', template_values)
 
