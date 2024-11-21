@@ -59,8 +59,10 @@
 
 <br />
 {% if measure_search or issues_selected %}
-    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+    <!-- <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp; -->
 {% endif %}
     <input type="text" name="measure_search" id="measure_id" value="{{ measure_search|default_if_none:"" }}" />
     <input type="submit" value="Search for measure" />
@@ -123,6 +125,11 @@
 <p><a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Measure</a></p>
 
     <script>
+    function clearSearch() {
+        displayLoadingBanner();
+        document.getElementById('measure_id').value = '';
+        document.forms['organization_position_choose_election'].submit();
+    }
     function displayLoadingBanner() {
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
@@ -131,19 +138,22 @@
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_all_elections_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#state_code_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
+
+        $('form[name="organization_position_choose_election"]').submit(function(event) {
+            displayLoadingBanner();
+        });
     });
+
     </script>
 
 {% endblock %}

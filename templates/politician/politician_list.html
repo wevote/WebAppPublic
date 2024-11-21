@@ -63,8 +63,10 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
-            show all states</a>&nbsp;&nbsp;&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+        <!-- <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
+            show all states</a>&nbsp;&nbsp;&nbsp; -->
         {% endif %}
     {% endif %}{# End of if state_list #}
 
@@ -257,8 +259,16 @@
 {% endif %}
 
     <script>
+
         function displayLoadingBanner() {
+            console.log("displayLoadingBanner triggered");
             document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
+        function clearSearch() {
+            console.log("clearSearch triggered");
+            displayLoadingBanner();
+            document.getElementById('politician_search_id').value = '';
+            document.forms['state_code_form'].submit();
         }
         $(function() {
             $('#exclude_politician_analysis_done_id').change(function() {

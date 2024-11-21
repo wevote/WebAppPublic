@@ -110,8 +110,10 @@
     <br />
 
 {% if campaignx_search %}
-    <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+    <!-- <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp; -->
 {% endif %}
     <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
     <input type="submit" id="campaignx_search_submit" value="Search for Campaign" />
@@ -318,6 +320,11 @@
     <p></p>
 
     <script>
+        function clearSearch() {
+            displayLoadingBanner();
+            document.getElementById('campaignx_search_id').value = '';
+            document.forms['state_code_form'].submit();
+        }
         function displayLoadingBanner() {
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
