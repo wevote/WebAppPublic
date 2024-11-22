@@ -63,7 +63,7 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+            <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
 
         <!-- <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
             show all states</a>&nbsp;&nbsp;&nbsp; -->
@@ -264,6 +264,7 @@
             console.log("displayLoadingBanner triggered");
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
+
         function clearSearch() {
             console.log("clearSearch triggered");
             displayLoadingBanner();
@@ -336,6 +337,12 @@
                 this.form.submit();
             });
         });
+
+        $(function() {
+            $('form[name="state_code_form"]').submit(function(event) {
+                displayLoadingBanner();
+            });
+        })
     </script>
 
 {% endblock %}

@@ -6,6 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
+{% include "admin_tools/loading_banner.html" %}
 <p>
   <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
      target="_blank">Import New Positions <span class="glyphicon glyphicon-new-window"></span></a>
@@ -113,8 +114,10 @@
     <br />
 
     {% if position_search %}
-        <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+        <!-- <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp; -->
     {% endif %}
 
     <input type="text" name="position_search" id="position_search_id" value="{{ position_search }}" />
@@ -210,37 +213,68 @@
 {#    <p><a href="{% url 'position:position_new' %}">Add New Position</a></p>#}
 
     <script>
+    function displayLoadingBanner() {
+        document.getElementById('FilterPopupMessage').style.display = 'block';
+    }
+
+    function clearSearch() {
+        displayLoadingBanner();
+        document.getElementById('position_search_id').value = '';
+        document.forms['organization_position_choose_election'].submit();
+    }
     $(function() {
         $('#google_civic_election_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_all_elections_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
-    });
-    {# wv-103: "Friends only" check box for admin users #}
-    $(function() {
+
+        {# wv-103: "Friends only" check box for admin users #}
         $('#show_friends_only_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
         });
-    });
-    {# end wv-103 #}
-    $(function() {
-        $('#show_statistics_id').change(function() {
-            this.form.submit();
-        });
-    });
-    $(function() {
+
         $('#show_this_year_of_elections_id').change(function() {
+            displayLoadingBanner();
             this.form.submit();
+        });
+        
+        {# end wv-103 #}
+        $('#show_statistics_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#state_code_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('form[name="organization_position_choose_election"]').submit(function(event) {
+            displayLoadingBanner();
         });
     });
     $(function() {
-        $('#state_code_id').change(function() {
-            this.form.submit();
-        });
+
+    });
+
+    $(function() {
+
+    });
+
+    $(function() {
+
+    });
+    $(function() {
+
+    });
+    $(function() {
+
     });
     </script>
 
