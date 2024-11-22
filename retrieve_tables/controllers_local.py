@@ -278,8 +278,9 @@ def process_table_data(table_name, split_data):
 
     # retrieve constraints from table
     # Some unique_cols should not get dummy values, since these values are relied on as keys to other tables
-    do_not_touch = ['we_vote_id', 'voter_id', 'linked_campaignx_we_vote_id', 'linked_politician_we_vote_id',
+    do_not_touch = ['we_vote_id', 'voter_id', 'linked_campaignx_we_vote_id',
                     'organization_we_vote_id', 'google_civic_election_id']
+    # removed  'linked_politician_we_vote_id',
     unique_constraints = inspector.get_unique_constraints(table_name)
     unique_cols = [con['column_names'][0] for con in unique_constraints]
     unique_cols = [x for x in unique_cols if x not in do_not_touch]
@@ -442,7 +443,7 @@ def get_dummy_ids(df, dummy_cols, unique_cols, not_null_id_cols, start_id):
     dummy_cols.update(set(unique_cols) - dummy_cols)
     dummy_cols.update(set(not_null_id_cols) - dummy_cols)
     dummy_cols = list(dummy_cols)
-    # print('dummy_cols -------------------> ', dummy_cols)
+    print('dummy_cols (replaced with a unique counter) ---> ', dummy_cols)
 
     new_ids = np.arange(start_id, start_id + len(df))
 
