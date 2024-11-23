@@ -2854,10 +2854,6 @@ def candidate_edit_process_view(request):
         performance_list = performance_process_dict.get('candidate_edit_view', [])
 
     performance_snapshot = {}
-    # performance_list.append(performance_snapshot)
-    # performance_dict = {
-    #     'candidate_edit_process_view': performance_list,
-    # }
 
     # return HttpResponse(rendered_template)
     # print("performance_dict: ", performance_dict)
@@ -3004,6 +3000,7 @@ def candidate_edit_process_view(request):
                     "&vote_usa_politician_id=" + str(vote_usa_politician_id )
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
+    t0 = time()
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
         try:
             res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
@@ -3012,8 +3009,18 @@ def candidate_edit_process_view(request):
         except Exception as e:
             status += "withdrawal_date_PROCESSING_FAILED: " + withdrawal_date + ": " + str(e) + " "
             withdrawal_date = None
+    t1 = time()
+
+    performance_snapshot_withdrawalDateProcessing = {
+        'name': 'WithdrawalDateProcessing',
+        'description': 'Time taken to validate and process the withdrawal date, ensuring it conforms to the correct date format (YYYY-MM-DD)',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_withdrawalDateProcessing)
 
     # Check to see if this candidate is already being used anywhere
+    t0 = time()
     candidate_on_stage_found = False
     candidate_on_stage = None
     election_manager = ElectionManager()
@@ -3030,9 +3037,19 @@ def candidate_edit_process_view(request):
                 candidate_year = candidate_on_stage.candidate_year
             state_code_from_candidate = candidate_on_stage.state_code
             candidate_on_stage_found = True
+    t1 = time()
+
+    performance_snapshot_candidateQuery = {
+        'name': 'CandidateQuery',
+        'description': 'Measures time to fetch candidate details from the database and initialize related variables. Includes querying CandidateCampaign and setting state and year values',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_candidateQuery)
 
     # ##################################
     # Deleting or Adding a new CandidateToOfficeLink
+    t0 = time()
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=[candidate_we_vote_id],
         read_only=False)
@@ -3047,6 +3064,15 @@ def candidate_edit_process_view(request):
             changes_found_dict['is_link_to_office_removed'] = True
             change_description += "REMOVED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
             change_description_changed = True
+    t1 = time()
+
+    performance_snapshot_candidateToOfficeLinkList = {
+        'name': 'CandidateToOfficeLinkList',
+        'description': 'Measures time to retrieve and delete Candidate-to-Office links. Includes processing user input and updating change logs',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_candidateToOfficeLinkList)
 
     candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
     if not positive_value_exists(candidate_to_office_link_add_election):
@@ -3121,28 +3147,18 @@ def candidate_edit_process_view(request):
         if positive_value_exists(candidate_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_office_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_election):
-            t16 = time()
+            t0 = time()
             results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
                 state_code=candidate_to_office_link_add_state_code)
-            t17 = time()
-            timeDifferenceRetrieveCandidateToOfficeLinkList = t17 - t16
-
-            # performance_snapshot["candidate_manager.get_or_create_candidate_to_office_link"] = "took {:.6f} seconds, ".format(time_difference1)
-
-            # performance_snapshot = {
-            #     'name': 'Retrieve_candidate_to_office_link_list',
-            #     'description': 'Candidate List Manager: Retrieve candidate to office link list',
-            #     'time_difference': time_difference1,  # Replace with actual time difference
-            # }
-            # performance_list.append(performance_snapshot)
+            t1 = time()
 
             performance_snapshot_retrieveCandidateToOfficeLinkList = {
                 'name': 'RetrieveCandidateToOfficeLinkList',
                 'description': 'Candidate List Manager: Retrieve candidate to office link list',
-                'time_difference': timeDifferenceRetrieveCandidateToOfficeLinkList,
+                'time_difference': t1 - t0,
             }
             performance_list.append(performance_snapshot_retrieveCandidateToOfficeLinkList)
 
@@ -3176,25 +3192,16 @@ def candidate_edit_process_view(request):
     # ##################################
     # Update "is_battleground_race" based on office data found through the link CandidateToOfficeLink
     # Also update "candidate_ultimate_election_date" and "candidate_year"
-    t2 = time()
+    t0 = time()
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=[candidate_we_vote_id],
         read_only=True)
-    t3 = time()
-    timeDifferenceRetrieveCandidateToOfficeLinkListForCandidate = t3 - t2
-    # performance_snapshot["candidate_list_manager.retrieve_candidate_to_office_link_list"] = "took {:.6f} seconds, ".format(time_difference2)
-
-    # performance_snapshot2 = {
-    #     'name': 'retrieve_candidate_to_office_link_list',
-    #     'description': 'Candidate List Manager: Retrieve candidate-to-office link list for given candidate',
-    #     'time_difference': time_difference2,
-    # }
-    # performance_list.append(performance_snapshot2)
+    t1 = time()
 
     performance_snapshot_retrieveCandidateToOfficeLinkListForCandidate = {
         'name': 'RetrieveCandidateToOfficeLinkListForCandidate',
         'description': 'Candidate List Manager: Retrieve candidate-to-office link list for given candidate',
-        'time_difference': timeDifferenceRetrieveCandidateToOfficeLinkListForCandidate,
+        'time_difference': t1 - t0,
     }
     performance_list.append(performance_snapshot_retrieveCandidateToOfficeLinkListForCandidate)
 
@@ -3302,6 +3309,7 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
 
     # Check to see if there is a duplicate candidate already saved for this election
+    t0 = time()
     existing_candidate_found = False
     if not positive_value_exists(candidate_id):
         try:
@@ -3333,6 +3341,15 @@ def candidate_edit_process_view(request):
                     existing_candidate_found = True
         except Exception as e:
             status += "PROBLEM_RETRIEVING_CANDIDATE_DUPLICATES: " + str(e) + " "
+    t1 = time()
+
+    performance_snapshot_CheckForDuplicateCandidates = {
+        'name': 'CheckForDuplicateCandidates',
+        'description': 'Measures time to check for duplicate candidates based on Ballotpedia ID, Maplight ID, and Vote Smart ID',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_CheckForDuplicateCandidates)
 
     retrieve_candidate_again_because_of_external_change = False
     try:
@@ -3780,7 +3797,7 @@ def candidate_edit_process_view(request):
             # After this point, if we make any changes to the Candidate, outside of this flow, we
             #  should retrieve the latest candidate from the database before saving again so we don't overwrite changes
             #  made outside of this flow.
-            t4 = time()
+            t0 = time()
             retrieve_photo_from_ballotpedia = False  # Checkbox from interface to trigger fresh retrieve
             ballotpedia_candidate_url_exists = positive_value_exists(ballotpedia_candidate_url) \
                 and 'ballotpedia.org' in ballotpedia_candidate_url
@@ -3794,22 +3811,12 @@ def candidate_edit_process_view(request):
                     save_to_database=True,
                 )
                 retrieve_candidate_again_because_of_external_change = True
-            t5 = time()
-            timeDifferenceGetPhotoURLFromBallotpedia = t5 - t4
-
-            # performance_snapshot["get_photo_url_from_ballotpedia"] = "took {:.6f} seconds, ".format(time_difference3)
-
-            # performance_snapshot5 = {
-            #     'name': 'get_photo_url_from_ballotpedia',
-            #     'description': 'Get photo URL from Ballotpedia',
-            #     'time_difference': time_difference3,
-            # }
-            # performance_list.append(performance_snapshot5)
+            t1 = time()
 
             performance_snapshot_getPhotoURLFromBallotpedia = {
                 'name': 'GetPhotoURLFromBallotpedia',
                 'description': 'Get photo URL from Ballotpedia',
-                'time_difference': timeDifferenceGetPhotoURLFromBallotpedia,
+                'time_difference': t1 - t0,
             }
             performance_list.append(performance_snapshot_getPhotoURLFromBallotpedia)
 
@@ -3891,7 +3898,6 @@ def candidate_edit_process_view(request):
             kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
         else:
             kind_of_log_entry = KIND_OF_LOG_ENTRY_LINK_ADDED
-        t8 = time()
         results = candidate_manager.create_candidate_log_entry(
             candidate_we_vote_id=candidate_we_vote_id,
             change_description=change_description,
@@ -3900,23 +3906,6 @@ def candidate_edit_process_view(request):
             changed_by_voter_we_vote_id=voter_we_vote_id,
             kind_of_log_entry=kind_of_log_entry,
         )
-        t9 = time()
-        timeDifferenceCreateCandidateLogEntry = t9 - t8
-        # performance_snapshot["candidate_manager.create_candidate_log_entry"] = "took {:.6f} seconds, ".format(time_difference4)
-
-        # performance_snapshot7 = {
-        #     'name': 'create_candidate_log_entry',
-        #     'description': 'Candidate Manager: Create a log entry for the candidate with the specified changes',
-        #     'time_difference': time_difference4,
-        # }
-        # performance_list.append(performance_snapshot7)
-
-        performance_snapshot_createCandidateLogEntry = {
-            'name': 'CreateCandidateLogEntry',
-            'description': 'Candidate Manager: Create a log entry for the candidate with the specified changes',
-            'time_difference': timeDifferenceCreateCandidateLogEntry,
-        }
-        performance_list.append(performance_snapshot_createCandidateLogEntry)
 
         # Now add to the volunteers scores for doing tasks
         if positive_value_exists(voter_we_vote_id):
@@ -3956,6 +3945,7 @@ def candidate_edit_process_view(request):
                               '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # Make sure 'which_marking' is one of the allowed Filter fields
+    t0 = time()
     if positive_value_exists(which_marking) \
             and which_marking not in ("not_a_match", "possible_match"):
         messages.add_message(request, messages.ERROR,
@@ -4028,9 +4018,19 @@ def candidate_edit_process_view(request):
             status += results['status']
             status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_CANDIDATE "
             messages.add_message(request, messages.ERROR, status)
+    t1 = time()
+
+    performance_snapshot_ProcessTwitterLinkPossibilities = {
+        'name': 'ProcessTwitterLinkPossibilities',
+        'description': 'Measures the time taken to update or reject Twitter link possibilities and synchronize related candidate fields',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_ProcessTwitterLinkPossibilities)
 
     # ##################################
     # If linked to a Politician, bring over some data from Politician
+    t0 = time()
     if candidate_on_stage_found and positive_value_exists(candidate_on_stage.politician_we_vote_id):
         try:
             politician_manager = PoliticianManager()
@@ -4079,6 +4079,15 @@ def candidate_edit_process_view(request):
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&show_candidates_with_twitter_options=1' +
                                     '&page=' + str(page))
+    t1 = time()
+
+    performance_snapshot_UpdatePoliticianDetailsFromCandidate = {
+        'name': 'UpdatePoliticianDetailsFromCandidate',
+        'description': 'Tracks time spent syncing politician details with candidate data, saving updates, and handling exceptions',
+        'time_difference': t1 - t0,
+    }
+
+    performance_list.append(performance_snapshot_UpdatePoliticianDetailsFromCandidate)
 
     # TODO: Commented out because this is crashing currently because the performance_dict variable was renamed
     # if performance_dict:
