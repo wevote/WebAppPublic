@@ -56,12 +56,12 @@ def scoreboard_list_view(request):
         messages.add_message(request, messages.ERROR, message)
     t1 = time()
     time_difference = t1 - t0
-    performance_snapshot1 = {
+    performance_snapshot = {
         'name': 'VolunteerTeam retrieve',
         'description': 'Retrieve VolunteerTeam list from database',
         'time_difference': time_difference,
     }
-    performance_list.append(performance_snapshot1)
+    performance_list.append(performance_snapshot)
 
     volunteer_team_member_list = []
     voter_team_member_we_vote_id_list = []
@@ -95,11 +95,10 @@ def scoreboard_list_view(request):
     update_performance_list = results['performance_list']
     performance_dict['update_weekly_volunteer_metrics'] = update_performance_list
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot = {
         'name': 'update_weekly_volunteer_metrics',
         'description': 'Calculates and updates weekly metrics',
-        'time_difference': time_difference,
+        'time_difference': t1 - t0,
     }
     performance_list.append(performance_snapshot)
 

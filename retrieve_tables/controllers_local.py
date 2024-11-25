@@ -90,13 +90,13 @@ def fetch_data_from_api(url, params, max_retries=10):
     for attempt in range(max_retries):
         # print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
         try:
-            response = requests.get(url, params=params, verify=True, timeout=5)
+            response = requests.get(url, params=params, verify=True, timeout=8)
             if response.status_code == 200:
                 return response.json()
             else:
                 logger.warning(f"\nAPI request failed with status code {response.status_code}, retrying...")
         except requests.Timeout:
-            logger.error(f"Request timed out, retrying...")
+            logger.error(f"Request timed out, retrying...\n{url} params: {params}")
         except requests.RequestException as e:
             logger.error(f"API request failed: {e}, retrying...")
         time.sleep(2 ** attempt)  # Exponential backoff

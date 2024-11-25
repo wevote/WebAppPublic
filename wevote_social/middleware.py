@@ -56,7 +56,6 @@ class SocialMiddleware(object):
             # return response
             # return HttpResponse()       TODO March 13, 2024 ... let fall through in all cases for now
 
-
         response = self.get_response(request)
     # def process_request(self, request):
         if hasattr(request, 'user'):
@@ -69,6 +68,7 @@ class SocialMiddleware(object):
 
         return response
 
+    @staticmethod
     def process_exception(request, exception):
         # if hasattr(social_exceptions, exception.__class__.__name__):
         #     if exception.__class__.__name__ == 'AuthAlreadyAssociated':
