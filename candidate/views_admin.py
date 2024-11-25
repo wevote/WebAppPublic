@@ -2251,10 +2251,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     politician_we_vote_id = ''
     seo_friendly_path = ''
     status = ''
-    # t0 = time()
-    # candidate_edit_process_view(request)
-    # t1 = time()
-    # timeDifferenceCandidateEditView = t1 - t0
 
     if isinstance(performance_process_dict, str):  # Only parse if it's a string
         try:
@@ -2319,27 +2315,17 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         if positive_value_exists(politician_we_vote_id):
             from politician.models import PoliticianSEOFriendlyPath
             try:
-                t2 = time()
+                t0 = time()
                 path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
                 path_query = path_query.filter(politician_we_vote_id=politician_we_vote_id)
                 path_count = path_query.count()
                 path_list = list(path_query[:3])
-                t3 = time()
-
-                # performance_snapshot["PoliticianSEOFriendlyPath and filter politician_wevote_id"] = "took {:.6f} seconds, ".format(
-                #     time_difference2)
-
-                # performance_snapshot3 = {
-                #     'name': 'PoliticianSEOFriendlyPath and filter politician_wevote_id',
-                #     'description': 'Query Politician SEO Friendly Path and filter on politician_wevote_id',
-                #     'time_difference': time_difference2,
-                # }
-                # performance_list.append(performance_snapshot3)
+                t1 = time()
 
                 performance_snapshot = {
                     'name': 'PoliticianSEOFriendlyPathRetrieve',
                     'description': 'Query Politician SEO Friendly Path and filter on politician_wevote_id',
-                    'time_difference': t3 - t2,
+                    'time_difference': t1 - t0,
                 }
                 performance_list.append(performance_snapshot)
 
@@ -2356,28 +2342,18 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
         # Working with We Vote Positions
         try:
-            t4 = time()
+            t0 = time()
             candidate_position_query = PositionEntered.objects.using('readonly').order_by('stance')
             # As of Aug 2018 we are no longer using PERCENT_RATING
             candidate_position_query = candidate_position_query.exclude(stance__iexact='PERCENT_RATING')
             candidate_position_query = candidate_position_query.filter(candidate_campaign_id=candidate_id)
             candidate_position_list = list(candidate_position_query)
-            t5 = time()
-            timeDifferencePositionEnteredFilter = t5 - t4
-            # performance_snapshot["PositionEntered and filter candidate_campaign_id"] = "took {:.6f} seconds, ".format(
-            #     time_difference3)
-
-            # performance_snapshot4 = {
-            #     'name': 'PositionEntered and filter candidate_campaign_id',
-            #     'description': 'Query PositionEntered and filter on candidate_campaign_id',
-            #     'time_difference': time_difference3,
-            # }
-            # performance_list.append(performance_snapshot4)
+            t1 = time()
 
             performance_snapshot_positionEnteredFilter = {
                 'name': 'PositionEnteredFilter',
                 'description': 'Query PositionEntered and filter on candidate_campaign_id',
-                'time_difference': timeDifferencePositionEnteredFilter,
+                'time_difference': t1 - t0,
             }
             performance_list.append(performance_snapshot_positionEnteredFilter)
 
@@ -2397,11 +2373,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         # except Exception as e:
         #     handle_record_not_found_exception(e, logger=logger)
         #     contest_office_list = []
-        t6 = time()
+        t0 = time()
         results = candidate_list_manager.retrieve_candidate_to_office_link_list(
             candidate_we_vote_id_list=[candidate_we_vote_id])
-        t7 = time()
-        timeDifferenceRetrieveCandidateToOfficeLinkList = t7 - t6
+        t1 = time()
         # performance_snapshot["candidate_list_manager.retrieve_candidate_to_office_link_list"] = "took {:.6f} seconds, ".format(
         #     time_difference4)
 
@@ -2415,7 +2390,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         performance_snapshot_retrieveCandidateToOfficeLinkList = {
             'name': 'RetrieveCandidateToOfficeLinkList',
             'description': 'Candidate List Manager: Retrieve candidate to office link list (again)',
-            'time_difference': timeDifferenceRetrieveCandidateToOfficeLinkList,
+            'time_difference': t1 - t0,
         }
         performance_list.append(performance_snapshot_retrieveCandidateToOfficeLinkList)
 
@@ -2440,27 +2415,17 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 
         twitter_link_possibility_list = []
         try:
-            t8 = time()
+            t0 = time()
             twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly')\
                 .order_by('not_a_match', '-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
-            t9 = time()
-            timeDifferenceTwitterLinkPossibilityFilter = t9 - t8
-            # performance_snapshot["TwitterLinkPossibility query and filter twitter_possibility_query on candidate_campaign" +
-            #                       "_we_vote_id"] = "took {:.6f} seconds, ".format(time_difference5)
-
-            # performance_snapshot7 = {
-            #     'name': 'TwitterLinkPossibility query and filter',
-            #     'description': 'Query TwitterLinkPossibility and filter on candidate_campaign_we_vote_id',
-            #     'time_difference': time_difference5,
-            # }
-            # performance_list.append(performance_snapshot7)
+            t1 = time()
 
             performance_snapshot_twitterLinkPossibilityFilter = {
                 'name': 'TwitterLinkPossibilityFilter',
                 'description': 'Query TwitterLinkPossibility and filter on candidate_campaign_we_vote_id',
-                'time_difference': timeDifferenceTwitterLinkPossibilityFilter,
+                'time_difference': t1 - t0,
             }
             performance_list.append(performance_snapshot_twitterLinkPossibilityFilter)
 
@@ -2474,28 +2439,19 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         google_search_possibility_list = []
         google_search_possibility_total_count = 0
         try:
-            t10 = time()
+            t0 = time()
             google_search_possibility_query = GoogleSearchUser.objects.using('readonly').filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             google_search_possibility_query = google_search_possibility_query.filter(likelihood_score__gte=0)
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
             google_search_possibility_total_count = google_search_possibility_query.count()
-            t11 = time()
-            timeDifferenceGoogleSearchUserFilter = t11 - t10
-            # performance_snapshot["GoogleSearchUser query and filter google_search_possibility_query"] = "took {:.6f} seconds, ".format(time_difference6)
-
-            # performance_snapshot8 = {
-            #     'name': 'GoogleSearchUser query and filter',
-            #     'description': 'Query GoogleSearchUser and filter google_search_possibility_query',
-            #     'time_difference': time_difference6,
-            # }
-            # performance_list.append(performance_snapshot8)
+            t1 = time()
 
             performance_snapshot_googleSearchUserFilter = {
                 'name': 'GoogleSearchUserFilter',
                 'description': 'Query GoogleSearchUser and filter on google_search_possibility_query',
-                'time_difference': timeDifferenceGoogleSearchUserFilter,
+                'time_difference': t1 - t0,
             }
             performance_list.append(performance_snapshot_googleSearchUserFilter)
 
@@ -2517,50 +2473,29 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         # #########################################
         # Search for possible duplicates
         from candidate.controllers import find_possible_duplicate_candidates_to_merge_with_this_candidate
-        t12 = time()
+        t0 = time()
         related_candidate_list = \
             find_possible_duplicate_candidates_to_merge_with_this_candidate(candidate=candidate_on_stage)
-        t13 = time()
-        timeDifferenceFindPossibleDuplicateCandidates = t13 - t12
-        # performance_snapshot["find_possible_duplicate_candidates_to_merge_with_this_candidate"] = "took {:.6f} seconds, ".format(
-        #     time_difference7)
-
-        # performance_snapshot9 = {
-        #     'name': 'find_possible_duplicate_candidates',
-        #     'description': 'Find potential duplicate candidates to merge with the specified candidate',
-        #     'time_difference': time_difference7,
-        # }
-        #
-        # performance_list.append(performance_snapshot9)
+        t1 = time()
 
         performance_snapshot_findPossibleDuplicateCandidates = {
             'name': 'FindPossibleDuplicateCandidates',
             'description': 'Find potential duplicate candidates to merge with the specified candidate',
-            'time_difference': timeDifferenceFindPossibleDuplicateCandidates,
+            'time_difference': t1 - t0,
         }
         performance_list.append(performance_snapshot_findPossibleDuplicateCandidates)
 
-        t14 = time()
+        t0 = time()
         queryset = CandidateChangeLog.objects.using('readonly').all()
         queryset = queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
         queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
-        t15 = time()
-        timeDifferenceCandidateChangeLogFilter = t15 - t14
-        # performance_snapshot["CandidateChangeLog query,filter on candidate_we_vote_id, order_by log_datetime"] = "took {:.6f} seconds, ".format(
-        #     time_difference8)
-
-        # performance_snapshot10 = {
-        #     'name': 'CandidateChangeLog query and filter',
-        #     'description': 'Query CandidateChangeLog and filter on candidate_we_vote_id, order by log_datetime',
-        #     'time_difference': time_difference8,
-        # }
-        # performance_list.append(performance_snapshot10)
+        t1 = time()
 
         performance_snapshot_candidateChangeLogFilter = {
             'name': 'CandidateChangeLogFilter',
             'description': 'Query CandidateChangeLog and filter on candidate_we_vote_id, order by log_datetime',
-            'time_difference': timeDifferenceCandidateChangeLogFilter,
+            'time_difference': t1 - t0,
         }
         performance_list.append(performance_snapshot_candidateChangeLogFilter)
 
