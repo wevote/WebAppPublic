@@ -27,7 +27,7 @@ from position.models import OPPOSE, PositionEntered, PositionListManager, SUPPOR
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
-from wevote_functions.functions_date import DATE_FORMAT_DAY_TWO_DIGIT
+from wevote_functions.functions_date import DATE_FORMAT_DAY_TWO_DIGIT, get_current_year_as_integer
 from django.http import HttpResponse
 import json
 
@@ -603,6 +603,7 @@ def measure_new_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # try:
     #     measure_list = ContestMeasure.objects.order_by('measure_title')
@@ -613,11 +614,30 @@ def measure_new_view(request):
     #     measure_list = ContestMeasure()
     #     pass
 
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage':        messages_on_stage,
+        'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
-        # 'measure_list':             measure_list,
+        'messages_on_stage':        messages_on_stage,
     }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -630,8 +650,7 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    # show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    show_all_elections = True
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     messages_on_stage = get_messages(request)
     measure_id = convert_to_int(measure_id)
@@ -677,9 +696,9 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
 
     template_values = {
         'election_list':            election_list,
-        'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
         'measure':                  measure_on_stage,
+        'messages_on_stage':        messages_on_stage,
     }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -791,6 +810,8 @@ def measure_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, 'ContestMeasure NOT updated -- missing we_vote_id.')
             else:
                 # Create new
+                if not positive_value_exists(measure_year):
+                    measure_year = get_current_year_as_integer()
                 measure_on_stage = ContestMeasure(
                     ballotpedia_measure_status=ballotpedia_measure_status,
                     ballotpedia_measure_url=ballotpedia_measure_url,
