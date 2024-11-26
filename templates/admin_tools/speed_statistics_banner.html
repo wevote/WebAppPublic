@@ -7,9 +7,6 @@
                                top: 2px;
                                right: 2px;">&times;
     </span>
-<!--    <ul>-->
-<!--{{performance_dict}}-->
-<!--    </ul>-->
 
     <table class="table table-bordered">
         <thead>
@@ -39,9 +36,31 @@
                 {% endfor %}
             {% endfor %}
         </tbody>
+        <tbody>
+            {% if performance_process_dict %}
+                {% for view, stats in performance_process_dict.items %}
+                    <tr>
+                        <td colspan="3" style="font-weight: bold; text-align: left">
+                            View: {{ view }}
+                        </td>
+                    </tr>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.name }}</td>
+                            <td>{{ stat.time_difference|floatformat:4 }}</td>
+                            <td style="font-weight: 300; color: #666;">
+                                {{ stat.description }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No performance data available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
     </table>
-
-
 </div>
 
 <div style="display: flex; justify-content: flex-end;">
