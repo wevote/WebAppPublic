@@ -586,6 +586,7 @@ def candidate_list_view(request):
     performance_list.append(performance_snapshot)
 
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
+    t0 = time()
     populate_contest_office_data = True
     number_to_populate = 500  # Normally we can process 1000 at a time
     if populate_contest_office_data and run_scripts:
@@ -658,7 +659,6 @@ def candidate_list_view(request):
 
         # Retrieve all the offices for these candidates
         from office.models import ContestOfficeListManager
-        t0 = time()
         contest_office_list_manager = ContestOfficeListManager()
         if len(contest_office_we_vote_id_list) > 0:
             results = contest_office_list_manager.retrieve_offices(
@@ -670,14 +670,6 @@ def candidate_list_view(request):
                 for one_office in contest_office_list:
                     if hasattr(one_office, 'district_name'):  # Make sure legit office object
                         contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
-
-        t1 = time()
-        performance_snapshot = {
-            'name': 'retrieve office for candidates',
-            'description': 'Retrieve offices list from database',
-            'time_difference': t1-t0,
-        }
-        performance_list.append(performance_snapshot)
 
         # Take CandidateToOfficeLink entries for each candidate, and figure out the contest_office object
         #  furthest in the future. We will use this to find the district_name and contest_office_name
@@ -752,6 +744,14 @@ def candidate_list_view(request):
             candidates_updated_or_not_updated = True
         if candidates_updated_or_not_updated and positive_value_exists(populate_contest_office_data_status):
             messages.add_message(request, messages.INFO, populate_contest_office_data_status)
+
+        t1 = time()
+        performance_snapshot = {
+            'name': 'Update candidates missing contest_office_name and/or district_name',
+            'description': 'Update candidates missing contest_office_name and/or district_name',
+            'time_difference': t1-t0,
+        }
+        performance_list.append(performance_snapshot)
 
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
     #  in linked politician
