@@ -498,8 +498,8 @@ def candidate_list_view(request):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     t1 = time()
     performance_snapshot = {
-        'name': 'Candidate_we_vote_id_list retrieve',
-        'description': 'Candidate_we_vote_id_list_retrieve',
+        'name': 'CandidateWeVoteIdList',
+        'description': 'Retrieve candidate_we_vote_id_list',
         'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
@@ -578,7 +578,7 @@ def candidate_list_view(request):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
     t1 = time()
     performance_snapshot = {
-        'name': 'Find Candidates with candidate_ultimate_election_date',
+        'name': 'CandidateUltimateElectionDateRetrieve',
         'description': 'Looking at one election, find all the candidates under that election and make sure each '
                        'candidate entry has a value for candidate_ultimate_election_date.',
         'time_difference': t1 - t0,
@@ -747,7 +747,7 @@ def candidate_list_view(request):
 
         t1 = time()
         performance_snapshot = {
-            'name': 'Update candidates missing contest_office_name and/or district_name',
+            'name': 'UpdateMissingContestOfficeOrDistrictName',
             'description': 'Update candidates missing contest_office_name and/or district_name',
             'time_difference': t1-t0,
         }
@@ -825,7 +825,7 @@ def candidate_list_view(request):
             messages.add_message(request, messages.INFO, seo_friendly_path_updates_status)
     t1 = time()
     performance_snapshot = {
-        'name': 'Update candidates who do not have SEO friendly path',
+        'name': 'UpdateNoSEOPath',
         'description': 'Update candidates who do not have SEO friendly path',
         'time_difference': t1-t0,
     }
@@ -930,7 +930,7 @@ def candidate_list_view(request):
 
     t1 = time()
     performance_snapshot = {
-        'name': 'Update candidates who currently do not have linked_campaignx_we_vote_id',
+        'name': 'UpdateNoLinkedInCampaignXWeVoteId',
         'description': 'Update candidates who currently do not have linked_campaignx_we_vote_id',
         'time_difference': t1-t0,
     }
@@ -1482,7 +1482,7 @@ def candidate_list_view(request):
     t1 = time()
     time_difference = t1 - t0
     performance_snapshot = {
-        'name': 'Attach the latest contest_office information',
+        'name': 'AttachContestOfficeInformation',
         'description': 'Attach the latest contest_office information',
         'time_difference': time_difference,
     }
@@ -1535,7 +1535,7 @@ def candidate_list_view(request):
                 candidate.candidate_merge_possibility = None
         t1 = time()
         performance_snapshot = {
-            'name': 'Attach best guess Twitter account',
+            'name': 'AttachTwitterGuess',
             'description': 'Attach the best guess Twitter account to each candidate',
             'time_difference': t1 - t0,
         }
@@ -1564,7 +1564,7 @@ def candidate_list_view(request):
                 candidate.google_search_merge_possibility = None
     t1 = time()
     performance_snapshot = {
-        'name': 'Attach best guess google search',
+        'name': 'AttachGoogleGuess',
         'description': 'Attach the best guess Google search to each candidate',
         'time_difference': t1 - t0,
     }
