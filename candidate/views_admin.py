@@ -1513,6 +1513,7 @@ def candidate_list_view(request):
     elif positive_value_exists(show_candidates_with_best_twitter_options) \
             or positive_value_exists(show_candidates_with_twitter_options):
         # Attach the best guess Twitter account, if any, to each candidate in list
+        t0 = time()
         for candidate in candidate_list:
             try:
                 twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly').order_by('-likelihood_score')
@@ -1532,6 +1533,13 @@ def candidate_list_view(request):
                         candidate.no_twitter_possibilities_found = True
             except Exception as e:
                 candidate.candidate_merge_possibility = None
+        t1 = time()
+        performance_snapshot = {
+            'name': 'Attach best guess Twitter account',
+            'description': 'Attach the best guess Twitter account to each candidate',
+            'time_difference': t1 - t0,
+        }
+        performance_list.append(performance_snapshot)
 
         # Attach the best guess google search, if any, to each candidate in list
         for candidate in candidate_list:
