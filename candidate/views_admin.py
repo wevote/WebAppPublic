@@ -499,11 +499,10 @@ def candidate_list_view(request):
             google_civic_election_id_list=[google_civic_election_id])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot1 = {
         'name': 'Candidate_we_vote_id_list retrieve',
         'description': '',
-        'time_difference': time_difference,
+        'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot1)
     # ################################################
@@ -515,6 +514,7 @@ def candidate_list_view(request):
     #  who have the general election as their ultimate_election_date, if they lost in the primary. That will require
     #  an update to this script.
     populate_candidate_ultimate_election_date = True
+    t0 = time()
     number_to_populate = 1000  # Normally we can process 10000 at a time
     if populate_candidate_ultimate_election_date and positive_value_exists(google_civic_election_id) and run_scripts:
         # We require google_civic_election_id just so we can limit the scope of this update
@@ -578,7 +578,13 @@ def candidate_list_view(request):
                 "candidates_not_updated: " + str(candidates_updated) + " "
         if positive_value_exists(populate_candidate_ultimate_election_date_status):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
-
+    t1 = time()
+    performance_snapshot4 = {
+        'name': 'Update Candidate from a specific election',
+        'description': '',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot4)
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
     populate_contest_office_data = True
     number_to_populate = 500  # Normally we can process 1000 at a time
@@ -666,11 +672,10 @@ def candidate_list_view(request):
                         contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
 
         t1 = time()
-        time_difference = t1 - t0
         performance_snapshot3 = {
             'name': 'retrieve office for candidates',
             'description': 'Retrieve offices list from database',
-            'time_difference': time_difference,
+            'time_difference': t1-t0,
         }
         performance_list.append(performance_snapshot3)
 
@@ -751,6 +756,7 @@ def candidate_list_view(request):
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
     #  in linked politician
     number_to_update = 1000
+    t0 =time()
     seo_friendly_path_updates = True
     if seo_friendly_path_updates and run_scripts:
         seo_friendly_path_updates_status = ""
@@ -817,8 +823,16 @@ def candidate_list_view(request):
         if positive_value_exists(seo_friendly_path_updates_status):
             seo_friendly_path_updates_status += "(UPDATE_SCRIPT) "
             messages.add_message(request, messages.INFO, seo_friendly_path_updates_status)
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Update candidates who do not have SEO friendly path',
+        'description': 'Update candidates who do not have SEO friendly path',
+        'time_difference': t1-t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # Update candidates who currently don't have linked_campaignx_we_vote_id, with value from linked politician
+    t0 = time()
     number_to_update = 1000
     campaignx_we_vote_id_updates = True
     if campaignx_we_vote_id_updates and run_scripts:
@@ -913,6 +927,14 @@ def candidate_list_view(request):
             campaignx_we_vote_id_updates_status = \
                 "SCRIPT campaignx_we_vote_id_updates: " + campaignx_we_vote_id_updates_status + " "
             messages.add_message(request, messages.INFO, campaignx_we_vote_id_updates_status)
+
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Update candidates who currently do not have linked_campaignx_we_vote_id',
+        'description': 'Update candidates who currently do not have linked_campaignx_we_vote_id',
+        'time_difference': t1-t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # ################################################
     # Maintenance script section END
