@@ -499,12 +499,12 @@ def candidate_list_view(request):
             google_civic_election_id_list=[google_civic_election_id])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     t1 = time()
-    performance_snapshot1 = {
+    performance_snapshot = {
         'name': 'Candidate_we_vote_id_list retrieve',
         'description': '',
         'time_difference': t1-t0,
     }
-    performance_list.append(performance_snapshot1)
+    performance_list.append(performance_snapshot)
     # ################################################
     # Maintenance script section START
     # ################################################
@@ -579,12 +579,12 @@ def candidate_list_view(request):
         if positive_value_exists(populate_candidate_ultimate_election_date_status):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
     t1 = time()
-    performance_snapshot4 = {
+    performance_snapshot = {
         'name': 'Update Candidate from a specific election',
         'description': '',
         'time_difference': t1 - t0,
     }
-    performance_list.append(performance_snapshot4)
+    performance_list.append(performance_snapshot)
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
     populate_contest_office_data = True
     number_to_populate = 500  # Normally we can process 1000 at a time
@@ -672,12 +672,12 @@ def candidate_list_view(request):
                         contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
 
         t1 = time()
-        performance_snapshot3 = {
+        performance_snapshot = {
             'name': 'retrieve office for candidates',
             'description': 'Retrieve offices list from database',
             'time_difference': t1-t0,
         }
-        performance_list.append(performance_snapshot3)
+        performance_list.append(performance_snapshot)
 
         # Take CandidateToOfficeLink entries for each candidate, and figure out the contest_office object
         #  furthest in the future. We will use this to find the district_name and contest_office_name
@@ -1482,12 +1482,12 @@ def candidate_list_view(request):
 
     t1 = time()
     time_difference = t1 - t0
-    performance_snapshot2 = {
+    performance_snapshot = {
         'name': 'modified_candidate_list retrieve',
         'description': '',
         'time_difference': time_difference,
     }
-    performance_list.append(performance_snapshot2)
+    performance_list.append(performance_snapshot)
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
