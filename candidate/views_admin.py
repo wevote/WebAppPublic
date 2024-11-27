@@ -1542,6 +1542,7 @@ def candidate_list_view(request):
         performance_list.append(performance_snapshot)
 
         # Attach the best guess google search, if any, to each candidate in list
+        t0 = time()
         for candidate in candidate_list:
             try:
                 google_search_possibility_query = GoogleSearchUser.objects.using('readonly').filter(
@@ -1561,6 +1562,13 @@ def candidate_list_view(request):
                         candidate.no_google_possibilities_found = True
             except Exception as e:
                 candidate.google_search_merge_possibility = None
+    t1 = time()
+    performance_snapshot = {
+        'name': 'Attach best guess google search',
+        'description': 'Attach the best guess Google search to each candidate',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
         from import_export_vote_usa.controllers import VOTE_USA_API_KEY, VOTE_USA_CANDIDATE_QUERY_URL
