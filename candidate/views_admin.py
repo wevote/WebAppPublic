@@ -1456,7 +1456,6 @@ def candidate_list_view(request):
                 election.public_positions_count = position_query.count()
 
     # Attach the latest contest_office information
-    # ADDED NEW
     modified_candidate_list = []
     t0 = time()
     for candidate in candidate_list:
@@ -1483,8 +1482,8 @@ def candidate_list_view(request):
     t1 = time()
     time_difference = t1 - t0
     performance_snapshot = {
-        'name': 'modified_candidate_list retrieve',
-        'description': '',
+        'name': 'Attach the latest contest_office information',
+        'description': 'Attach the latest contest_office information',
         'time_difference': time_difference,
     }
     performance_list.append(performance_snapshot)
