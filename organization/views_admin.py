@@ -2438,6 +2438,7 @@ def organization_position_new_view(request, organization_id):
     measure_search = request.GET.get('measure_search', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
     state_code = request.GET.get('state_code', '')
+    print("State Code Retrieved:", state_code)
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # Take in some incoming values
@@ -2497,7 +2498,7 @@ def organization_position_new_view(request, organization_id):
     candidates_for_this_election_list = []
     results = candidate_list.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
-        state_code=state_code,
+        state_code=state_code if state_code else None,
         search_string=candidate_search,
         return_list_of_objects=True,
         read_only=True)
@@ -2510,14 +2511,17 @@ def organization_position_new_view(request, organization_id):
     contest_measures_for_this_election_list = []
     results = contest_measure_list.retrieve_all_measures_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
-        state_code=state_code,
+        state_code=state_code if state_code else None,
         search_string=measure_search,
         return_list_of_objects=True)
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
 
-    print("Measures for this election list:", contest_measures_for_this_election_list)
-    
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    print("sorted_state_list:", sorted_state_list)
+
     try:
         organization_position_query = PositionEntered.objects.order_by('stance')
         # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -2581,6 +2585,7 @@ def organization_position_new_view(request, organization_id):
             'stance':                                       stance,
             'statement_text':                               statement_text,
             'more_info_url':                                more_info_url,
+            'sorted_state_list':                            sorted_state_list,
         }
     return render(request, 'organization/organization_position_edit.html', template_values)
 
@@ -2755,6 +2760,11 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
                 if results['election_found']:
                     one_election = results['election']
                     election_list.append(one_election)
+    
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    print("Sorted state_list: ", sorted_state_list)
 
     if organization_position_on_stage_found:
         template_values = {
@@ -2767,6 +2777,7 @@ def organization_position_edit_view(request, organization_id=0, organization_we_
             'stance_selected':                              organization_position_on_stage.stance,
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
+            'sorted_state_list':                            sorted_state_list,
         }
 
     return render(request, 'organization/organization_position_edit.html', template_values)
