@@ -1308,6 +1308,7 @@ def candidate_list_view(request):
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
+    t0 = time()
     facebook_urls_without_picture_urls = 0
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
@@ -1330,6 +1331,15 @@ def candidate_list_view(request):
         facebook_urls_without_picture_urls = count_queryset.count()
     except Exception as e:
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
+
+    t1 = time()
+    time_difference = t1 - t0
+    performance_snapshot = {
+        'name': 'DetermineFacebookUrlWithoutPhoto',
+        'description': 'Determine how many facebook_url do not have facebook_profile_image_url',
+        'time_difference': time_difference,
+    }
+    performance_list.append(performance_snapshot)
 
     # How many candidates with wikipedia_candidate_url's don't have wikipedia_photo_url?
     wikipedia_urls_without_picture_urls = 0
