@@ -452,10 +452,9 @@ def candidate_list_view(request):
     show_marquee_or_battleground = positive_value_exists(request.GET.get('show_marquee_or_battleground', False))
     show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
     show_candidates_with_email = positive_value_exists(request.GET.get('show_candidates_with_email', False))
-
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
-
     performance_dict = (request.GET.get('performance_dict', {}))
+
     if not performance_dict:
         performance_list = []
         performance_dict = {
@@ -491,7 +490,6 @@ def candidate_list_view(request):
     candidate_list_manager = CandidateListManager()
 
     candidate_we_vote_id_list = []
-    # ADDED NEW
     t0 = time()
     if positive_value_exists(google_civic_election_id):
         candidate_list_manager = CandidateListManager()
@@ -501,7 +499,7 @@ def candidate_list_view(request):
     t1 = time()
     performance_snapshot = {
         'name': 'Candidate_we_vote_id_list retrieve',
-        'description': '',
+        'description': 'Candidate_we_vote_id_list_retrieve',
         'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
@@ -580,11 +578,13 @@ def candidate_list_view(request):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
     t1 = time()
     performance_snapshot = {
-        'name': 'Update Candidate from a specific election',
-        'description': '',
+        'name': 'Find Candidates with candidate_ultimate_election_date',
+        'description': 'Looking at one election, find all the candidates under that election and make sure each '
+                       'candidate entry has a value for candidate_ultimate_election_date.',
         'time_difference': t1 - t0,
     }
     performance_list.append(performance_snapshot)
+
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
     populate_contest_office_data = True
     number_to_populate = 500  # Normally we can process 1000 at a time
