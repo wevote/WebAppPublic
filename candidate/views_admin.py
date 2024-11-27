@@ -1064,6 +1064,7 @@ def candidate_list_view(request):
         filtered_candidate_we_vote_id_list = battleground_candidate_we_vote_id_list
 
     # Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list
+    t0 = time()
     try:
         candidate_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id_list_generated) \
@@ -1254,6 +1255,14 @@ def candidate_list_view(request):
                 candidate_list = candidate_query[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
         pass
+
+    t1 = time()
+    performance_snapshot = {
+        'name': 'RetrieveCandidateListFromFilteredCandidateWeVoteIdList',
+        'description': 'Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     candidates_linked_to_multiple_offices = 0
     if positive_value_exists(google_civic_election_id) and \
