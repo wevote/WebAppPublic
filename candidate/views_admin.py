@@ -452,8 +452,17 @@ def candidate_list_view(request):
     show_marquee_or_battleground = positive_value_exists(request.GET.get('show_marquee_or_battleground', False))
     show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
     show_candidates_with_email = positive_value_exists(request.GET.get('show_candidates_with_email', False))
-
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
+    performance_dict = (request.GET.get('performance_dict', {}))
+
+    if not performance_dict:
+        performance_list = []
+        performance_dict = {
+            'candidate_list_view': performance_list,
+        }
+    else:
+        performance_dict = eval(performance_dict)
+        performance_list = performance_dict.get('candidate_list_view', [])
 
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
@@ -481,12 +490,19 @@ def candidate_list_view(request):
     candidate_list_manager = CandidateListManager()
 
     candidate_we_vote_id_list = []
+    t0 = time()
     if positive_value_exists(google_civic_election_id):
         candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=[google_civic_election_id])
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-
+    t1 = time()
+    performance_snapshot = {
+        'name': 'CandidateWeVoteIdList',
+        'description': 'Retrieve candidate_we_vote_id_list',
+        'time_difference': t1-t0,
+    }
+    performance_list.append(performance_snapshot)
     # ################################################
     # Maintenance script section START
     # ################################################
@@ -496,6 +512,7 @@ def candidate_list_view(request):
     #  who have the general election as their ultimate_election_date, if they lost in the primary. That will require
     #  an update to this script.
     populate_candidate_ultimate_election_date = True
+    t0 = time()
     number_to_populate = 1000  # Normally we can process 10000 at a time
     if populate_candidate_ultimate_election_date and positive_value_exists(google_civic_election_id) and run_scripts:
         # We require google_civic_election_id just so we can limit the scope of this update
@@ -559,8 +576,17 @@ def candidate_list_view(request):
                 "candidates_not_updated: " + str(candidates_updated) + " "
         if positive_value_exists(populate_candidate_ultimate_election_date_status):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
+    t1 = time()
+    performance_snapshot = {
+        'name': 'CandidateUltimateElectionDateRetrieve',
+        'description': 'Looking at one election, find all the candidates under that election and make sure each '
+                       'candidate entry has a value for candidate_ultimate_election_date.',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
+    t0 = time()
     populate_contest_office_data = True
     number_to_populate = 500  # Normally we can process 1000 at a time
     if populate_contest_office_data and run_scripts:
@@ -719,9 +745,18 @@ def candidate_list_view(request):
         if candidates_updated_or_not_updated and positive_value_exists(populate_contest_office_data_status):
             messages.add_message(request, messages.INFO, populate_contest_office_data_status)
 
+        t1 = time()
+        performance_snapshot = {
+            'name': 'UpdateMissingContestOfficeOrDistrictName',
+            'description': 'Update candidates missing contest_office_name and/or district_name',
+            'time_difference': t1-t0,
+        }
+        performance_list.append(performance_snapshot)
+
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
     #  in linked politician
     number_to_update = 1000
+    t0 =time()
     seo_friendly_path_updates = True
     if seo_friendly_path_updates and run_scripts:
         seo_friendly_path_updates_status = ""
@@ -788,8 +823,16 @@ def candidate_list_view(request):
         if positive_value_exists(seo_friendly_path_updates_status):
             seo_friendly_path_updates_status += "(UPDATE_SCRIPT) "
             messages.add_message(request, messages.INFO, seo_friendly_path_updates_status)
+    t1 = time()
+    performance_snapshot = {
+        'name': 'UpdateNoSEOPath',
+        'description': 'Update candidates who do not have SEO friendly path',
+        'time_difference': t1-t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # Update candidates who currently don't have linked_campaignx_we_vote_id, with value from linked politician
+    t0 = time()
     number_to_update = 1000
     campaignx_we_vote_id_updates = True
     if campaignx_we_vote_id_updates and run_scripts:
@@ -884,6 +927,14 @@ def candidate_list_view(request):
             campaignx_we_vote_id_updates_status = \
                 "SCRIPT campaignx_we_vote_id_updates: " + campaignx_we_vote_id_updates_status + " "
             messages.add_message(request, messages.INFO, campaignx_we_vote_id_updates_status)
+
+    t1 = time()
+    performance_snapshot = {
+        'name': 'UpdateNoLinkedInCampaignXWeVoteId',
+        'description': 'Update candidates who currently do not have linked_campaignx_we_vote_id',
+        'time_difference': t1-t0,
+    }
+    performance_list.append(performance_snapshot)
 
     # ################################################
     # Maintenance script section END
@@ -1013,6 +1064,7 @@ def candidate_list_view(request):
         filtered_candidate_we_vote_id_list = battleground_candidate_we_vote_id_list
 
     # Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list
+    t0 = time()
     try:
         candidate_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id_list_generated) \
@@ -1204,6 +1256,14 @@ def candidate_list_view(request):
     except CandidateCampaign.DoesNotExist:
         pass
 
+    t1 = time()
+    performance_snapshot = {
+        'name': 'RetrieveCandidateListFromFilteredCandidateWeVoteIdList',
+        'description': 'Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
+
     candidates_linked_to_multiple_offices = 0
     if positive_value_exists(google_civic_election_id) and \
             positive_value_exists(find_candidates_linked_to_multiple_offices):
@@ -1248,6 +1308,7 @@ def candidate_list_view(request):
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
     #     is not null and facebook_profile_image_url_https is null
+    t0 = time()
     facebook_urls_without_picture_urls = 0
     try:
         count_queryset = CandidateCampaign.objects.using('readonly').all()
@@ -1270,6 +1331,15 @@ def candidate_list_view(request):
         facebook_urls_without_picture_urls = count_queryset.count()
     except Exception as e:
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
+
+    t1 = time()
+    time_difference = t1 - t0
+    performance_snapshot = {
+        'name': 'DetermineFacebookUrlWithoutPhoto',
+        'description': 'Determine how many facebook_url do not have facebook_profile_image_url',
+        'time_difference': time_difference,
+    }
+    performance_list.append(performance_snapshot)
 
     # How many candidates with wikipedia_candidate_url's don't have wikipedia_photo_url?
     wikipedia_urls_without_picture_urls = 0
@@ -1406,6 +1476,7 @@ def candidate_list_view(request):
 
     # Attach the latest contest_office information
     modified_candidate_list = []
+    t0 = time()
     for candidate in candidate_list:
         election_id_found_from_link = False
         office_results = \
@@ -1426,6 +1497,15 @@ def candidate_list_view(request):
                 candidate.instagram_url = url
         modified_candidate_list.append(candidate)
     candidate_list = modified_candidate_list
+
+    t1 = time()
+    time_difference = t1 - t0
+    performance_snapshot = {
+        'name': 'AttachContestOfficeInformation',
+        'description': 'Attach the latest contest_office information',
+        'time_difference': time_difference,
+    }
+    performance_list.append(performance_snapshot)
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(google_civic_election_id):
@@ -1452,6 +1532,7 @@ def candidate_list_view(request):
     elif positive_value_exists(show_candidates_with_best_twitter_options) \
             or positive_value_exists(show_candidates_with_twitter_options):
         # Attach the best guess Twitter account, if any, to each candidate in list
+        t0 = time()
         for candidate in candidate_list:
             try:
                 twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly').order_by('-likelihood_score')
@@ -1471,8 +1552,16 @@ def candidate_list_view(request):
                         candidate.no_twitter_possibilities_found = True
             except Exception as e:
                 candidate.candidate_merge_possibility = None
+        t1 = time()
+        performance_snapshot = {
+            'name': 'AttachTwitterGuess',
+            'description': 'Attach the best guess Twitter account to each candidate',
+            'time_difference': t1 - t0,
+        }
+        performance_list.append(performance_snapshot)
 
         # Attach the best guess google search, if any, to each candidate in list
+        t0 = time()
         for candidate in candidate_list:
             try:
                 google_search_possibility_query = GoogleSearchUser.objects.using('readonly').filter(
@@ -1492,6 +1581,13 @@ def candidate_list_view(request):
                         candidate.no_google_possibilities_found = True
             except Exception as e:
                 candidate.google_search_merge_possibility = None
+    t1 = time()
+    performance_snapshot = {
+        'name': 'AttachGoogleGuess',
+        'description': 'Attach the best guess Google search to each candidate',
+        'time_difference': t1 - t0,
+    }
+    performance_list.append(performance_snapshot)
 
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
         from import_export_vote_usa.controllers import VOTE_USA_API_KEY, VOTE_USA_CANDIDATE_QUERY_URL
@@ -1534,6 +1630,7 @@ def candidate_list_view(request):
         'next_page_url':                            next_page_url,
         'no_supporters':                            no_supporters,
         'previous_page_url':                        previous_page_url,
+        'performance_dict':                         performance_dict,
         'review_mode':                              review_mode,
         'show_all_elections':                       show_all_elections,
         'show_candidates_with_best_twitter_options':    show_candidates_with_best_twitter_options,
