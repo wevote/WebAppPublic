@@ -457,16 +457,34 @@ def candidate_list_view(request):
     show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
     show_candidates_with_email = positive_value_exists(request.GET.get('show_candidates_with_email', False))
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
-    performance_dict = (request.GET.get('performance_dict', {}))
+    # performance_dict = (request.GET.get('performance_dict', {}))
+    performance_process_dict = (request.GET.get('performance_process_dict', {}))
+    status = ""
 
-    if not performance_dict:
-        performance_list = []
-        performance_dict = {
-            'candidate_list_view': performance_list,
-        }
-    else:
-        performance_dict = eval(performance_dict)
-        performance_list = performance_dict.get('candidate_list_view', [])
+    performance_dict = {}
+
+    if isinstance(performance_process_dict, str):
+        try:
+            performance_process_dict = json.loads(performance_process_dict)
+            try:
+                performance_dict.update(performance_process_dict)
+            except Exception as e:
+                status += "Error parsing performance_process_dict: {error}.format(error=e)"
+        except json.JSONDecodeError:
+            status += "Error decoding performance_process_dict: {error}.format(error=e)"
+
+    performance_list = []
+    performance_dict.update({
+        'candidate_list_view': performance_list,
+    })
+    # if not performance_dict:
+    #     performance_list = []
+    #     performance_dict = {
+    #         'candidate_list_view': performance_list,
+    #     }
+    # else:
+    #     performance_dict = eval(performance_dict)
+    #     performance_list = performance_dict.get('candidate_list_view', [])
 
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
@@ -1337,11 +1355,10 @@ def candidate_list_view(request):
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot = {
         'name': 'DetermineFacebookUrlWithoutPhoto',
         'description': 'Determine how many facebook_url do not have facebook_profile_image_url',
-        'time_difference': time_difference,
+        'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
 
@@ -1503,11 +1520,10 @@ def candidate_list_view(request):
     candidate_list = modified_candidate_list
 
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot = {
         'name': 'AttachContestOfficeInformation',
         'description': 'Attach the latest contest_office information',
-        'time_difference': time_difference,
+        'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
 
