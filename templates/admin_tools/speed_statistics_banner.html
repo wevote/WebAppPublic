@@ -3,7 +3,7 @@
 <body>
 <div class="alert alert-info" role="alert" id="SpeedStatisticsPopup"
      style="display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; text-align: center; padding: 15px;">
-    <span class="close" id="speed-statistics-close" style="position: absolute;
+    <span class="close" id="SpeedStatisticsClose" style="position: absolute;
                                 top: 2px;
                                 right: 2px;">&times;
     </span>
@@ -52,7 +52,7 @@
     });
 
     // Handle hiding the Speed Statistics table on close button click
-    document.getElementById('speed-statistics-close').addEventListener('click', function() {
+    document.getElementById('SpeedStatisticsClose').addEventListener('click', function() {
         document.getElementById('SpeedStatisticsPopup').style.display = 'none';
         document.getElementById('SpeedStatisticsButton').style.display = 'block';
     });
