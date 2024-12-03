@@ -477,14 +477,6 @@ def candidate_list_view(request):
     performance_dict.update({
         'candidate_list_view': performance_list,
     })
-    # if not performance_dict:
-    #     performance_list = []
-    #     performance_dict = {
-    #         'candidate_list_view': performance_list,
-    #     }
-    # else:
-    #     performance_dict = eval(performance_dict)
-    #     performance_list = performance_dict.get('candidate_list_view', [])
 
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
