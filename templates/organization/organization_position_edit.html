@@ -128,12 +128,10 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
             {% if candidates_for_this_election_list %}
                 <option value="0">-- select candidate --</option>
                 {% for candidate_campaign_from_loop in candidates_for_this_election_list %}
-                    {% if not state_code or candidate_campaign_from_loop.state_code == state_code %}
-                        <option value="{{ candidate_campaign_from_loop.id }}"
-                                {% if candidate_campaign_from_loop.id|slugify == candidate_id|slugify %} selected="selected"{% endif %}>
-                            {{ candidate_campaign_from_loop.candidate_name }}
-                        </option>
-                    {% endif %}
+                    <option value="{{ candidate_campaign_from_loop.id }}"
+                            {% if candidate_campaign_from_loop.id|slugify == candidate_id|slugify %} selected="selected"{% endif %}>
+                        {{ candidate_campaign_from_loop.candidate_name }}
+                    </option>
                 {% endfor %}
             {% else %}
             <option value="0">-- no candidates found --</option>
@@ -166,12 +164,10 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
             {% if contest_measures_for_this_election_list %}
                 <option value="0">-- select measure --</option>
                 {% for contest_measure_from_loop in contest_measures_for_this_election_list %}
-                    {% if not state_code or contest_measure_from_loop.state_code == state_code %}
-                        <option value="{{ contest_measure_from_loop.id }}"
-                                {% if contest_measure_from_loop.id|slugify == contest_measure_id|slugify %} selected="selected"{% endif %}>
-                            {{ contest_measure_from_loop.measure_title }}
-                        </option>
-                    {% endif %}
+                    <option value="{{ contest_measure_from_loop.id }}"
+                            {% if contest_measure_from_loop.id|slugify == contest_measure_id|slugify %} selected="selected"{% endif %}>
+                        {{ contest_measure_from_loop.measure_title }}
+                    </option>
                 {% endfor %}s
             {% else %}
             <option value="0">-- no measures found --</option>
@@ -270,7 +266,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
 
-
+Retrieved
 </form>
 
 
@@ -334,26 +330,34 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
 
 <script>
-    $(function() {
-        document.getElementById('state_id').addEventListener('change', function () {
-            const selectedValue = this.value;
-            console.log("Selected State Code:", selectedValue);
-        });
-        $('#state_id').change(function() {
-            this.form.submit();
-        });
-    })
-    $(function() {
-        $('#google_civic_election_id').change(function() {
+    // Handle state selection change
+    document.getElementById('state_id').addEventListener('change', function () {
+        const stateCode = this.value; // Get the selected state code
+        console.log("Selected State Code:", stateCode); // Log the state code for debugging
+
+        // Update the query string with the new state_code
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('state_code', stateCode);
+        console.log("Updated URL Params:", urlParams.toString());
+        // Update the URL, triggering a page reload with the updated query string
+        window.location.search = urlParams.toString();
+    });
+
+    // Handle google_civic_election_id changes
+    $(function () {
+        $('#google_civic_election_id').change(function () {
             this.form.submit();
         });
     });
-    $(function() {
-        $('#show_all_elections_id').change(function() {
+
+    // Handle show_all_elections checkbox changes
+    $(function () {
+        $('#show_all_elections_id').change(function () {
             this.form.submit();
         });
     });
 </script>
+
 
 
 {% endblock %}

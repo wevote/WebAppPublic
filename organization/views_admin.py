@@ -2498,29 +2498,36 @@ def organization_position_new_view(request, organization_id):
     candidates_for_this_election_list = []
     results = candidate_list.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
-        state_code=state_code if state_code else None,
+        state_code=state_code.upper() if state_code else None, 
         search_string=candidate_search,
         return_list_of_objects=True,
         read_only=True)
+
     if results['candidate_list_found']:
         candidates_for_this_election_list = results['candidate_list_objects']
 
-    print("Candidates for this election list:", candidates_for_this_election_list)
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureListManager()
     contest_measures_for_this_election_list = []
     results = contest_measure_list.retrieve_all_measures_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
-        state_code=state_code if state_code else None,
+        state_code=state_code.upper() if state_code else None, 
         search_string=measure_search,
         return_list_of_objects=True)
+
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
+
+    if results['measure_list_found']:
+        for measure in results['measure_list_objects']:
+            print(f"Measure: {measure}")
+            print(f"State Code: {getattr(measure, 'state_code', 'Not Found')}")
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    print("sorted_state_list:", sorted_state_list)
+
+
 
     try:
         organization_position_query = PositionEntered.objects.order_by('stance')
@@ -2807,7 +2814,7 @@ def organization_position_edit_process_view(request):
     show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
-
+    state_code = request.GET.get('state_code', '')
     go_back_to_add_new = False
     candidate_we_vote_id = ""
     google_civic_candidate_name = ""
@@ -2819,7 +2826,7 @@ def organization_position_edit_process_view(request):
     organization_on_stage = Organization()
     candidate_on_stage = CandidateCampaign()
     contest_measure_on_stage = ContestMeasure()
-    state_code = ""
+
     position_manager = PositionManager()
 
     # Make sure this is a valid organization before we try to save a position
