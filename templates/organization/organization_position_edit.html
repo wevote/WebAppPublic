@@ -332,14 +332,12 @@ Retrieved
 <script>
     // Handle state selection change
     document.getElementById('state_id').addEventListener('change', function () {
-        const stateCode = this.value; // Get the selected state code
-        console.log("Selected State Code:", stateCode); // Log the state code for debugging
+        const stateCode = this.value; 
+        console.log("Selected State Code:", stateCode); 
 
-        // Update the query string with the new state_code
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('state_code', stateCode);
         console.log("Updated URL Params:", urlParams.toString());
-        // Update the URL, triggering a page reload with the updated query string
         window.location.search = urlParams.toString();
     });
 
