@@ -333,11 +333,8 @@ Retrieved
     // Handle state selection change
     document.getElementById('state_id').addEventListener('change', function () {
         const stateCode = this.value; 
-        console.log("Selected State Code:", stateCode); 
-
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('state_code', stateCode);
-        console.log("Updated URL Params:", urlParams.toString());
         window.location.search = urlParams.toString();
     });
 
