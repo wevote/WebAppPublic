@@ -8,7 +8,7 @@
 
 Mac instructions 
 
-Install the latest Python 3.x from package: https://www.python.org/downloads/
+Install the latest Python 3.11.x from package: https://www.python.org/downloads/ (Please note you need to be on Python 3.11 in the virtual environment. We don't support 3.12 yet.)
 
 This allows you to run python3 and pip3. 
 (Software gets installed into a folder like this, depending on the version: /Library/Frameworks/Python.framework/Versions/3.11/bin/.)
@@ -29,7 +29,7 @@ outside of "PythonProjects" folder:
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
     $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
-    $ virtualenv3 WeVoteServer3.6
+    $ virtualenv3 WeVoteServer3.11
 
 Now activate this new virtual environment for WeVoteServer:
 

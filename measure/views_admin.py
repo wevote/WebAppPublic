@@ -27,7 +27,7 @@ from position.models import OPPOSE, PositionEntered, PositionListManager, SUPPOR
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
-from wevote_functions.functions_date import DATE_FORMAT_DAY_TWO_DIGIT
+from wevote_functions.functions_date import DATE_FORMAT_DAY_TWO_DIGIT, get_current_year_as_integer
 from django.http import HttpResponse
 import json
 
@@ -36,6 +36,43 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+@login_required
+def measure_delete_process_view(request):
+    """
+    Delete a measure
+    :param request:
+    :return:
+    """
+
+    measure_id = convert_to_int(request.POST.get('measure_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    state_code = request.POST.get('state_code', '')
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this Measure. '
+                             'Please check the checkbox to confirm you want to delete this measure.')
+        return HttpResponseRedirect(reverse('measure:measure_edit', args=(measure_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_measure_manager = ContestMeasureManager()
+    results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id=measure_id)
+    if results['contest_measure_found']:
+        contest_measure = results['contest_measure']
+        contest_measure.delete()
+        messages.add_message(request, messages.INFO, 'Measure deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Measure not found.')
+
+    return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
 
 @login_required
 def compare_two_measures_for_merge_view(request):
@@ -566,6 +603,7 @@ def measure_new_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     # try:
     #     measure_list = ContestMeasure.objects.order_by('measure_title')
@@ -576,11 +614,30 @@ def measure_new_view(request):
     #     measure_list = ContestMeasure()
     #     pass
 
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+        # Make sure we always include the current election in the election_list, even if it is older
+        if positive_value_exists(google_civic_election_id):
+            this_election_found = False
+            for one_election in election_list:
+                if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    this_election_found = True
+                    break
+            if not this_election_found:
+                results = election_manager.retrieve_election(google_civic_election_id)
+                if results['election_found']:
+                    one_election = results['election']
+                    election_list.append(one_election)
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage':        messages_on_stage,
+        'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
-        # 'measure_list':             measure_list,
+        'messages_on_stage':        messages_on_stage,
     }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -593,8 +650,7 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    # show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    show_all_elections = True
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
 
     messages_on_stage = get_messages(request)
     measure_id = convert_to_int(measure_id)
@@ -640,9 +696,9 @@ def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
 
     template_values = {
         'election_list':            election_list,
-        'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
         'measure':                  measure_on_stage,
+        'messages_on_stage':        messages_on_stage,
     }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -754,6 +810,8 @@ def measure_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, 'ContestMeasure NOT updated -- missing we_vote_id.')
             else:
                 # Create new
+                if not positive_value_exists(measure_year):
+                    measure_year = get_current_year_as_integer()
                 measure_on_stage = ContestMeasure(
                     ballotpedia_measure_status=ballotpedia_measure_status,
                     ballotpedia_measure_url=ballotpedia_measure_url,

@@ -3,13 +3,10 @@
 <body>
 <div class="alert alert-info" role="alert" id="SpeedStatisticsPopup"
      style="display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; text-align: center; padding: 15px;">
-    <span class="close" style="position: absolute;
-                               top: 2px;
-                               right: 2px;">&times;
+    <span class="close" id="speed-statistics-close" style="position: absolute;
+                                top: 2px;
+                                right: 2px;">&times;
     </span>
-<!--    <ul>-->
-<!--{{performance_dict}}-->
-<!--    </ul>-->
 
     <table class="table table-bordered">
         <thead>
@@ -22,7 +19,7 @@
         <tbody>
             {% for view, stats in performance_dict.items %}
                 <tr>
-                    <td colspan="3" style="font-weight: bold; text-align: left">View: {{ view }}</td>
+                    <td colspan="3" style="font-weight: bold; text-align: left">{{ view }}</td>
                 </tr>
                 {% for stat in stats %}
                     <tr>
@@ -40,8 +37,6 @@
             {% endfor %}
         </tbody>
     </table>
-
-
 </div>
 
 <div style="display: flex; justify-content: flex-end;">
@@ -57,7 +52,7 @@
     });
 
     // Handle hiding the Speed Statistics table on close button click
-    document.querySelector('.close').addEventListener('click', function() {
+    document.getElementById('speed-statistics-close').addEventListener('click', function() {
         document.getElementById('SpeedStatisticsPopup').style.display = 'none';
         document.getElementById('SpeedStatisticsButton').style.display = 'block';
     });
