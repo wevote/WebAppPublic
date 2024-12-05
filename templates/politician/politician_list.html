@@ -63,16 +63,15 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-            <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
-
-        <!-- <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
-            show all states</a>&nbsp;&nbsp;&nbsp; -->
+            <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
+                show all states</a>&nbsp;&nbsp;&nbsp;
         {% endif %}
     {% endif %}{# End of if state_list #}
 
     {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
-         clear search</a>&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+    <!-- <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&{{ checkbox_url_variables }}">
+         clear search</a>&nbsp; -->
     {% endif %}
     <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
     <input id="politician_search_submit" type="submit" value="Search for Politician" />
@@ -264,7 +263,6 @@
             console.log("displayLoadingBanner triggered");
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
-
         function clearSearch() {
             console.log("clearSearch triggered");
             displayLoadingBanner();
