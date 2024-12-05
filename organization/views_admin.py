@@ -2518,16 +2518,14 @@ def organization_position_new_view(request, organization_id):
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
 
-    if results['measure_list_found']:
-        for measure in results['measure_list_objects']:
-            print(f"Measure: {measure}")
-            print(f"State Code: {getattr(measure, 'state_code', 'Not Found')}")
+    # get a list of all measures and state codes
+    # if results['measure_list_found']:
+    #     for measure in results['measure_list_objects']:
+    #         print(f"Measure: {measure}")
+    #         print(f"State Code: {getattr(measure, 'state_code', 'Not Found')}")
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
-
-
-
 
     try:
         organization_position_query = PositionEntered.objects.order_by('stance')

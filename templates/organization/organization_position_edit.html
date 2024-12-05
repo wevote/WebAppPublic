@@ -2,14 +2,11 @@
 {# This template is used to add (or edit) an organization's position on a CandidateCampaign or a MeasureCampaign #}
 {% extends "template_base.html" %}
 
-
 {% block title %}{% if organization_position %}Edit Position{% else %}Add Position{% endif %}{% endblock %}
-
 
 {%  block content %}
 {% load template_filters %}
 <!-- START organization/templates/organization/organization_position_edit.html //-->
-
 
 <style>
   .form-group {
@@ -21,23 +18,17 @@
   }
 </style>
 
-
     <p><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
         < Back to Endorser Positions</a></p>
-
 
 <h1>{% if not organization_position %}Enter Position for {% endif %}{% if organization.organization_name %}{{ organization.organization_name }}{% else %}(org name missing){% endif %}{% if organization_position %}<br />
 Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-
 <form action="{% url "organization:organization_position_edit_process" %}" method="post">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{{ organization.id }}">
     <input type="hidden" name="position_we_vote_id" value="{% if organization_position %}{{ organization_position.we_vote_id }}{% endif %}">
-
-
-
 
 {# CandidateCampaign #}
 {% if is_in_edit_mode %}
@@ -48,7 +39,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
       <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
     {% endif %}
     (<a href="{% url 'position:position_delete_process' %}?position_we_vote_id={{ organization_position.we_vote_id }}&google_civic_election_id={% if organization_position %}{{ organization_position.google_civic_election_id }}{% endif %}">delete position</a>)
-
 
     {# Election #}
     <div class="form-group">
@@ -63,7 +53,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
                 {{ organization_position.election.election_day_text }}
             {% endif %}
 
-
         {# Default to showing only upcoming elections #}
         <label for="show_all_elections_id">
           <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
@@ -72,10 +61,8 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         </div>
     </div>
 
-
 {% else %}
     {# NEW ENTRY #}
-
 
     {% if election_list %}
 <div class="form-group">
@@ -91,7 +78,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         {% endfor %}
         </select>
 
-
         {# Default to showing only upcoming elections #}
         <label for="show_all_elections_id">
           <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
@@ -100,7 +86,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
     {% endif %}
-
 
     <div class="form-group">
         <label for="state_id" class="col-sm-2 control-label">State</label>
@@ -138,10 +123,8 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
             {% endif %}
         </select>
 
-
         <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
         <input type="submit" value="Search for Candidate" />
-
 
         {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
             <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
@@ -151,7 +134,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         {% endif %}
     </div>
 </div>
-
 
     {# ADD NEW: Show the drop-down of measures this org can have enter a position for #}
 <div class="form-group{% if candidate_and_measure_not_found %} has-error{% endif %}">
@@ -208,9 +190,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
 
-
-
-
 {# Stance Text #}
 <div class="form-group">
     <label for="statement_text_id" class="col-sm-2 control-label">Please Explain Stance</label>
@@ -218,7 +197,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         <textarea name="statement_text" id="statement_text_id" class="form-control" >{% if organization_position.statement_text %}{{ organization_position.statement_text }}{% else %}{{ statement_text }}{% endif %}</textarea>
     </div>
 </div>
-
 
 {# URI for more details #}
 <div class="form-group">
@@ -237,7 +215,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
 
-
 {# More details #}
 <div class="form-group">
     <label for="more_details_id" class="col-sm-2 control-label">
@@ -254,7 +231,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
     </div>
 </div>
 
-
 <div class="form-group">
     <div class="col-sm-9">
         <button class="btn btn-primary" name="save_button" type="submit" value="1">
@@ -268,7 +244,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
 Retrieved
 </form>
-
 
 {% if organization_position %}
 <p>&nbsp;</p>
@@ -285,7 +260,6 @@ Retrieved
 </p>
 {% endif %}
 
-
     <br />
     <br />
 <div style="clear:both; padding-bottom: 20px">
@@ -300,7 +274,6 @@ Retrieved
               <td>Election Date</td>
           </tr>
       </thead>
-
 
       {% for organization_position in organization_position_list %}
       <tr>
@@ -328,31 +301,28 @@ Retrieved
   {% endif %}
 </div>
 
-
 <script>
     // Handle state selection change
-    document.getElementById('state_id').addEventListener('change', function () {
-        const stateCode = this.value; 
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('state_code', stateCode);
-        window.location.search = urlParams.toString();
-    });
-
-    // Handle google_civic_election_id changes
     $(function () {
+        // Handle state selection change
+        $('#state_id').change(function () {
+            const stateCode = $(this).val();
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('state_code', stateCode);
+            window.location.search = urlParams.toString();
+        });
+
+        // Handle google_civic_election_id changes
         $('#google_civic_election_id').change(function () {
             this.form.submit();
         });
-    });
 
-    // Handle show_all_elections checkbox changes
-    $(function () {
+        // Handle show_all_elections checkbox changes
         $('#show_all_elections_id').change(function () {
             this.form.submit();
         });
     });
+
 </script>
-
-
 
 {% endblock %}
