@@ -571,6 +571,106 @@ def sitewide_election_metrics_sync_out_view(request):  # sitewideElectionMetrics
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def backup_one_table_to_s3_view(request):  # backupOneTableToS3
+    status = ''
+    success = True
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        json_data = {
+            'success': False,
+            'status': 'SITEWIDE_ELECTION_METRICS_SYNC_OUT-NOT_ANALYTICS_ADMIN '
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    starting_date_as_integer = convert_to_int(request.GET.get('starting_date_as_integer', 0))
+    ending_date_as_integer = convert_to_int(request.GET.get('ending_date_as_integer', 0))
+    return_csv_format = positive_value_exists(request.GET.get('return_csv_format', False))
+
+    if not positive_value_exists(starting_date_as_integer):
+        one_month_ago = now() - timedelta(days=30)
+        starting_date_as_integer = convert_date_to_date_as_integer(one_month_ago)
+
+    if not positive_value_exists(ending_date_as_integer):
+        time_now = now()
+        ending_date_as_integer = convert_date_to_date_as_integer(time_now)
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_elections_between_dates(
+        starting_date_as_integer=starting_date_as_integer,
+        ending_date_as_integer=ending_date_as_integer
+    )
+    election_list = results['election_list']
+    google_civic_election_id_list = []
+    for one_election in election_list:
+        google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    try:
+        metrics_query = SitewideElectionMetrics.objects.all().order_by('-id')
+        metrics_query = metrics_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+
+        metrics_list_dict = metrics_query.values(
+            'id', 'authenticated_visitors_total',
+            'election_day_text', 'entered_full_address',
+            'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
+            'individuals_with_friends_only_positions', 'individuals_with_positions',
+            'individuals_with_public_positions',
+            'issues_followed',
+            'organization_public_positions', 'organizations_auto_followed', 'organizations_followed',
+            'organizations_signed_in', 'organizations_with_positions',
+            'public_positions', 'public_positions_with_comments',
+            'unique_voters_that_auto_followed_organizations', 'unique_voters_that_followed_organizations',
+            'visitors_total', 'voter_guide_entries',
+            'voter_guide_views', 'voter_guides_viewed',
+        )
+        if metrics_list_dict:
+            metrics_list_raw = list(metrics_list_dict)
+            if return_csv_format:
+                # Create the HttpResponse object with the appropriate CSV header.
+                filename = "sitewideElectionMetricsSyncOut"
+                filename += "-" + str(starting_date_as_integer)
+                filename += "-" + str(ending_date_as_integer)
+                filename += ".csv"
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+
+                writer = csv.writer(response)
+                writer.writerow(
+                    [
+                        'id', 'authenticated_visitors_total',
+                        'election_day_text', 'entered_full_address',
+                        'friends_only_positions', 'friends_only_positions_with_comments', 'google_civic_election_id',
+                        'individuals_with_friends_only_positions', 'individuals_with_positions',
+                        'individuals_with_public_positions',
+                        'issues_followed',
+                        'organization_public_positions', 'organizations_auto_followed', 'organizations_followed',
+                        'organizations_signed_in', 'organizations_with_positions',
+                        'public_positions', 'public_positions_with_comments',
+                        'unique_voters_that_auto_followed_organizations', 'unique_voters_that_followed_organizations',
+                        'visitors_total', 'voter_guide_entries',
+                        'voter_guide_views', 'voter_guides_viewed',
+                    ])
+                for one_dict in metrics_list_raw:
+                    one_row = list(one_dict.values())
+                    writer.writerow(one_row)
+
+                return response
+            else:
+                analytics_action_list_json = []
+                for one_dict in metrics_list_raw:
+                    analytics_action_list_json.append(one_dict)
+                return HttpResponse(json.dumps(analytics_action_list_json), content_type='application/json')
+    except Exception as e:
+        status += 'QUERY_FAILURE: ' + str(e) + ' '
+        success = False
+
+    status += 'SITEWIDE_ELECTION_METRICS_LIST_EMPTY '
+    json_data = {
+        'success': success,
+        'status': status,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 def sitewide_voter_metrics_sync_out_view(request):  # sitewideVoterMetricsSyncOut
     status = ''
     success = True

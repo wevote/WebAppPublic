@@ -21,6 +21,7 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_pledge_to_vote, views_politician, views_position, views_reaction, views_representative, \
     views_retrieve_tables, views_task, views_share, views_twitter, views_voter, views_voter_guide, \
     views_googlebot_site_map
+from apis_v1.views.views_retrieve_tables import backup_one_table_to_s3_view
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view, \
@@ -333,8 +334,11 @@ urlpatterns = [
                           sitewide_daily_metrics_sync_out_view, name='sitewideDailyMetricsSyncOutView'),
                   re_path(r'^sitewideElectionMetricsSyncOut/',
                           sitewide_election_metrics_sync_out_view, name='sitewideElectionMetricsSyncOutView'),
+                  re_path(r'^backupOneTableToS3/',
+                          backup_one_table_to_s3_view, name='backupOneTableToS3View'),
                   re_path(r'^sitewideVoterMetricsSyncOut/',
                           sitewide_voter_metrics_sync_out_view, name='sitewideVoterMetricsSyncOutView'),
+
                   # re_path(r'^taskDelete/', views_task.delete_task, name='taskDelete'),
                   # re_path(r'^taskSaveNew/', views_task.save_new_task, name='taskSaveNewView'),
                   # re_path(r'^taskCompletedOutput/', views_task.read_output_record, name='taskCompletedOutput'),
@@ -752,6 +756,9 @@ urlpatterns = [
                   re_path(r'^docs/sitewideElectionMetricsSyncOut/',
                           views_docs.sitewide_election_metrics_sync_out_doc_view,
                           name='sitewideElectionMetricsSyncOutDocs'),
+                  path('docs/backupOneTableToS3/',
+                       views_docs.backup_one_table_to_s3_doc_view,
+                       name='backupOneTableToS3Docs'),
                   re_path(r'^docs/sitewideVoterMetricsSyncOut/',
                           views_docs.sitewide_voter_metrics_sync_out_doc_view, name='sitewideVoterMetricsSyncOutDocs'),
                   path('docs/searchAll/',

@@ -21,6 +21,7 @@ from retrieve_tables.controllers_master import allowable_tables
 from wevote_functions.functions import get_voter_api_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
+t0 = 0
 
 # This api will only return the data from the following tables
 
@@ -55,7 +56,7 @@ def update_fast_load_db(host, voter_api_device_id, table_name, additional_record
 
         # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
         # print(response.request.url)
-        # print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
+        print('update_fast_load_db ', response.status_code, response.url, voter_api_device_id)
     except Exception as e:
         logger.error('update_fast_load_db caught: ', str(e))
 
@@ -123,6 +124,80 @@ def get_max_id(params):
 
 
 def retrieve_sql_files_from_master_server(request):
+    results = {}
+    t0 = time.time()
+    try:
+        # hack, call master from local
+        # results = backup_one_table_to_s3(request)
+        # con = results.content
+
+        aws_s3_file_url = ('nonsense')
+        # restore_one_file_to_local_server(aws_s3_file_url, 'ballot_ballotitem')
+    except Exception as e:
+        results['status'] = 'Error ' + str(e)
+
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def restore_one_file_to_local_server_experimental(aws_s3_file_url, table_name):
+    import boto3
+    import tempfile
+    results = {}
+
+    s3 = boto3.client('s3')
+
+    AWS_STORAGE_BUCKET_NAME = get_environment_variable("AWS_STORAGE_BUCKET_NAME")
+    head, tail = os.path.split(aws_s3_file_url)
+
+    diff_t0 = time.time() - t0
+    print("About to download from S3 at {:.6f} seconds".format(diff_t0))
+    tf = tempfile.NamedTemporaryFile(mode='r+b')
+    s3.download_file(AWS_STORAGE_BUCKET_NAME, tail, tf.name)
+    diff_t0 = time.time() - t0
+    print("Done with download from S3 at {:.6f} seconds".format(diff_t0))
+
+    try:
+        db_name = get_environment_variable("DATABASE_NAME"),
+        db_user = get_environment_variable('DATABASE_USER'),
+        db_password = get_environment_variable('DATABASE_PASSWORD'),
+        db_host = get_environment_variable('DATABASE_HOST'),
+        db_port = get_environment_variable('DATABASE_PORT')
+
+        # 'pg_restore -a -t your_table /path/to/dump.sql'
+        # '-h {db_host[0]} -p {db_port} -d {db_name[0]} -U {db_user[0]} -t {table_name}'
+
+        diff_t0 = time.time() - t0
+        print("About to drop_table {} at {:.6f} seconds".format(table_name, diff_t0))
+        engine = connect_to_db()
+        drop_table(engine, table_name)
+
+        # TODO might need a delay here
+        time.sleep(3)
+
+        diff_t0 = time.time() - t0
+        print("About to pg_restore from tempfile at {:.6f} seconds".format(diff_t0))
+
+        command_str = f"pg_restore --h {db_host[0]} -p {db_port} -d {db_name[0]} -U {db_user[0]} -t {table_name} {tf.name}"
+        # command_str = f"pg_restore -a --h {db_host[0]} -p {db_port} -d {db_name[0]} -U {db_user[0]} -t {table_name} {tf.name}"
+        os.system(command_str)
+
+        diff_t0 = time.time() - t0
+        print("Restore completed at {:.6f} seconds".format(diff_t0))
+        success = True
+    except Exception as e:
+        print("!!Problem occurred!!", e)
+        success = False,
+        results['error string'] = str(e)
+
+        # with open(aws_s3_file_url.path, "rb") as f:
+        #     dump_file_text = f.read()
+    return results
+
+
+
+
+def retrieve_sql_files_from_master_server (request):
     """
     Get the json data, and create new entries in the developers local database
     Runs on the Local server (developer's Mac)
@@ -207,7 +282,7 @@ def truncate_table(engine, table_name):
         try:
             # Truncate the table
             conn.execute(sa.text(f"TRUNCATE {table_name} RESTART IDENTITY CASCADE"))
-            conn.commit()
+            print(f"RUNNING: TRUNCATE {table_name} RESTART IDENTITY CASCADE")
         except Exception as e:
             print(f'FAILED_TABLE_TRUNCATE: {table_name} -- {str(e)}')
         # checking that table is actually empty before inserting new data
@@ -219,6 +294,31 @@ def truncate_table(engine, table_name):
                 return
         except Exception as e:
             print(f"TRUNCATION_CHECK: {table_name} -- {str(e)}")
+
+
+# def drop_table(engine, table_name):
+#     """
+#     Truncates (completely clears contents of) local table
+#     :param engine: connection to local Postgres
+#     :param table_name: table to truncate
+#     :return:
+#     """
+#     with engine.connect() as conn:
+#         try:
+#             # Drop the table
+#             conn.execute(sa.text(f"DROP {table_name}"))
+#             print(f"RUNNING: DROP {table_name} ")
+#         except Exception as e:
+#             print(f'FAILED_TABLE_DROP: {table_name} -- {str(e)}')
+#         # checking that table is actually empty before inserting new data
+#         # try:
+#         #     result = conn.execute(sa.text(f"SELECT COUNT(*) FROM {table_name}"))
+#         #     row_count = result.fetchone()[0]
+#         #     if row_count > 0:
+#         #         print(f"Error: {table_name} is not empty after truncation")
+#         #         return
+#         # except Exception as e:
+#         #     print(f"DROP_CHECK: {table_name} -- {str(e)}")
 
 
 def reset_id_seq(engine, table_name):
