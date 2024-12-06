@@ -318,6 +318,11 @@
     <p></p>
 
     <script>
+        function clearSearch() {
+            displayLoadingBanner();
+            document.getElementById('campaignx_search_id').value = '';
+            document.forms['state_code_form'].submit();
+        }
         function displayLoadingBanner() {
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }

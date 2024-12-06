@@ -47,8 +47,9 @@
     </label>
 <br/><br/>
 {% if office_held_search %}
-    <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false">clear search</a>&nbsp;
+    <!-- <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp; -->
 {% endif %}
 <input type="text" name="office_held_search" id="office_held_search_id" value="{{ office_held_search }}" style="width: 450px" />
 <input type="submit" value="Search for Office Held" />
@@ -102,6 +103,11 @@
 </form>
 
 <script>
+    function clearSearch() {
+        displayLoadingBanner();
+        document.getElementById('office_held_search_id').value = '';
+        document.forms['organization_position_choose_election'].submit();
+    }
     function displayLoadingBanner() {
         document.getElementById('FilterPopupMessage').style.display = 'block';
     }
@@ -110,29 +116,29 @@
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_battleground_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#show_ocd_id_state_mismatch_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+        
         $('#google_civic_election_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#state_code_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
+        });
+
+        $('form[name="organization_position_choose_election"]').submit(function(event) {
+            displayLoadingBanner();
         });
     });
 

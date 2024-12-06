@@ -67,8 +67,10 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if race_office_level %}&race_office_level={{ race_office_level }}{% endif %}{% if show_marquee_or_battleground %}&show_marquee_or_battleground=1{% endif %}{% if show_all_elections %}&show_all_elections=1{% endif %}">
-            show all</a>
+            <a href="#" onclick="showAllStates(); return false;">
+                show all states</a>
+        <!-- <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if race_office_level %}&race_office_level={{ race_office_level }}{% endif %}{% if show_marquee_or_battleground %}&show_marquee_or_battleground=1{% endif %}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            show all</a> -->
         {% endif %}
     {% endif %}{# End of if state_list #}
     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -88,8 +90,9 @@
     <br />
 
     {% if office_search %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-             clear search</a>&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+        <!-- <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp; -->
     {% endif %}
     <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
     <input type="submit" value="Search for Office" />
@@ -232,57 +235,70 @@
 {% endif %}
 
     <script>
-    function displayLoadingBanner() {
-        document.getElementById('FilterPopupMessage').style.display = 'block';
-    }
-    $(function() {
-        $('#google_civic_election_id').change(function() {
+
+
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
+
+        function clearSearch() {
             displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#has_ctcl_data_id').change(function() {
+            document.getElementById('office_search_id').value = '';
+            document.forms['organization_position_choose_election'].submit();
+        }
+
+        function showAllStates() {
             displayLoadingBanner();
-            this.form.submit();
+            document.getElementById('state_code_id').value = '';
+            document.forms['organization_position_choose_election'].submit();
+        }
+        
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#has_ctcl_data_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#has_vote_usa_data_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#race_office_level_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_all_elections_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_marquee_or_battleground_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#state_code_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_statistics_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('form[name="organization_position_choose_election"]').submit(function(event) {
+                displayLoadingBanner();
+            });
         });
-    });
-    $(function() {
-        $('#has_vote_usa_data_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#race_office_level_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_all_elections_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_marquee_or_battleground_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#state_code_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_statistics_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
+
     </script>
 
 {% endblock %}

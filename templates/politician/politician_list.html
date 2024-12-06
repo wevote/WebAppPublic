@@ -257,8 +257,16 @@
 {% endif %}
 
     <script>
+
         function displayLoadingBanner() {
+            console.log("displayLoadingBanner triggered");
             document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
+        function clearSearch() {
+            console.log("clearSearch triggered");
+            displayLoadingBanner();
+            document.getElementById('politician_search_id').value = '';
+            document.forms['state_code_form'].submit();
         }
         $(function() {
             $('#exclude_politician_analysis_done_id').change(function() {
@@ -326,6 +334,12 @@
                 this.form.submit();
             });
         });
+
+        $(function() {
+            $('form[name="state_code_form"]').submit(function(event) {
+                displayLoadingBanner();
+            });
+        })
     </script>
 
 {% endblock %}

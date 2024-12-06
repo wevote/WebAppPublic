@@ -12,6 +12,7 @@
 {% endblock %}
 
 {%  block content %}
+{% include "admin_tools/loading_banner.html" %}
 
 <h1>{% if state_name %}{{ state_name }} {% endif %}Map Points</h1>
 
@@ -81,8 +82,10 @@
 
 
 {% if polling_location_search or issues_selected %}
-    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+    <!-- <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp; -->
 {% endif %}
     <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
     <input type="submit" value="Search for Map Point" />&nbsp;&nbsp;&nbsp;
@@ -224,9 +227,61 @@
 <br />
 <input type="hidden" id="state_list" value="{{ state_list }}">
     <script>
+        const sourceCodeList = {{ source_code_list|safe }};
+        console.log("Source Code List:", sourceCodeList);
+        function displayLoadingBanner() {
+            document.getElementById('FilterPopupMessage').style.display = 'block';
+        }
+
+        function clearSearch() {
+            displayLoadingBanner();
+            document.getElementById('polling_location_id').value = '';
+            document.forms['polling_location_search_form'].submit();
+        }
+
         $(function() {
-            $('#state_code').change(function() {
+            $('#show_ctcl_errors_id').change(function() {
+                displayLoadingBanner();
                 this.form.submit();
+            });
+
+            $('#show_vote_usa_errors_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_successful_retrieves_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_no_contests_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_bulk_retrieve_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_POST_OFFICE_LAT_LONG_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#show_PUBLIC_SCHOOLS_id').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('#state_code').change(function() {
+                displayLoadingBanner();
+                this.form.submit();
+            });
+
+            $('form[name="polling_location_search_form"]').submit(function(event) {
+                displayLoadingBanner();
             });
         });
     </script>

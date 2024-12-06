@@ -69,8 +69,10 @@
     {% endif %}{# End of if years_available #}
     &nbsp;&nbsp;
     {% if representative_search %}
-    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+    <!-- <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
+         clear search</a>&nbsp; -->
     {% endif %}
     <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
     <input  id="representative_search_submit_id" type="submit" value="Search for Representative" />
@@ -186,6 +188,11 @@
 {% endif %}
 
     <script>
+        function clearSearch() {
+            displayLoadingBanner();
+            document.getElementById('representative_search_id').value = '';
+            document.forms['state_code_form'].submit();
+        }
         function displayLoadingBanner() {
             document.getElementById('FilterPopupMessage').style.display ='block';
         }

@@ -148,8 +148,10 @@
     <br />
 
 {% if organization_search %}
-    <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
-         clear search</a>&nbsp;
+    <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+    <!-- <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
+         clear search</a>&nbsp; -->
 {% endif %}
     <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
     <input type="submit" value="Search for Endorser" />
@@ -264,6 +266,11 @@
 {#    </p>#}
 
     <script>
+        function clearSearch() {
+            displayLoadingBanner();
+            document.getElementById('organization_search_id').value = '';
+            document.forms['state_code_form'].submit();
+        }
         function displayLoadingBanner() {
             document.getElementById('FilterPopupMessage').style.display = 'block';
         }
@@ -316,6 +323,9 @@
             $('#state_code_id').change(function() {
                 displayLoadingBanner();
                 this.form.submit();
+            });
+            $('form[name="state_code_form"]').submit(function(event) {
+                displayLoadingBanner();
             });
         });
     </script>

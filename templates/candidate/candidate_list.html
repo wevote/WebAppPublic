@@ -355,8 +355,9 @@
 <br />
 <form name="candidate_search" method="get" action="{% url 'candidate:candidate_list' %}">
     {% if candidate_search %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
-         clear search</a>&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+    <!-- <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
+         clear search</a>&nbsp; -->
     {% endif %}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
     <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
@@ -805,6 +806,11 @@
 <br />
 <br />
     <script>
+    function clearSearch() {
+        displayLoadingBanner();
+        document.getElementById('candidate_search_id').value = '';
+        document.forms['candidate_search'].submit();
+    }
     function hideElement(elementId) {
       var x = document.getElementById(elementId);
       x.style.display = "none";
@@ -925,6 +931,11 @@ $(function() {
             this.form.submit();
         });
     });
+    $(function() {
+        $('form[name="candidate_search"]').submit(function(event) {
+            displayLoadingBanner();
+        });
+    })
     </script>
 
 {% endblock %}

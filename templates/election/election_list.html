@@ -44,8 +44,10 @@
 
 
     {% if election_search %}
-        <a href="{% url 'election:election_list' %}">
-             clear search</a>&nbsp;
+        <a href="#" onclick="clearSearch(); return false;">clear search</a>&nbsp;
+
+        <!-- <a href="{% url 'election:election_list' %}">
+             clear search</a>&nbsp; -->
     {% endif %}
         <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
         <input type="submit" value="Search" />
@@ -629,6 +631,11 @@
     </p>
 
 <script>
+    function clearSearch() {
+        displayLoadingBanner()
+        document.getElementById('election_search_id').value = '';
+        document.forms['election_search_form'].submit();
+    }
     function displayLoadingBanner() {
     document.getElementById('FilterPopupMessage').style.display = 'block';
 }
