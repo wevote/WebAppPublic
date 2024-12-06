@@ -121,6 +121,18 @@
              {% if exclude_politician_analysis_done %}checked{% endif %} /> Exclude Analyzed
     </label>
 </form>
+<!-- Pagination Section -->
+{% if not hide_pagination %}
+<span class="float-right">
+    {% if previous_page_url %}
+        <a href="{{ previous_page_url }}">Previous page</a> |
+    {% endif %}
+    Page {{ current_page_number|add:1 }}
+    {% if next_page_url %}
+        | <a href="{{ next_page_url }}">Next page</a>
+    {% endif %}
+</span>
+{% endif %}
 
 {% if politician_list %}
     <table class="table">
@@ -142,7 +154,7 @@
       </thead>
     {% for politician in politician_list %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td>{{ forloop.counter|add:start_index }}</td>
             <td{% if politician.profile_image_background_color %}
                     style="padding-left: 0; padding-right: 0;"
                 {% endif %}>
@@ -248,6 +260,18 @@
         </tr>
     {% endfor %}
     </table>
+    <!-- Pagination Section -->
+{% if not hide_pagination %}
+<span class="float-right">
+    {% if previous_page_url %}
+        <a href="{{ previous_page_url }}">Previous page</a> |
+    {% endif %}
+    Page {{ current_page_number|add:1 }}
+    {% if next_page_url %}
+        | <a href="{{ next_page_url }}">Next page</a>
+    {% endif %}
+</span>
+{% endif %}
 
     <p></p>
 {% else %}
