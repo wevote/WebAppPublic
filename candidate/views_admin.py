@@ -457,16 +457,26 @@ def candidate_list_view(request):
     show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
     show_candidates_with_email = positive_value_exists(request.GET.get('show_candidates_with_email', False))
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
-    performance_dict = (request.GET.get('performance_dict', {}))
+    # performance_dict = (request.GET.get('performance_dict', {}))
+    performance_process_dict = (request.GET.get('performance_process_dict', {}))
+    status = ""
 
-    if not performance_dict:
-        performance_list = []
-        performance_dict = {
-            'candidate_list_view': performance_list,
-        }
-    else:
-        performance_dict = eval(performance_dict)
-        performance_list = performance_dict.get('candidate_list_view', [])
+    performance_dict = {}
+
+    if isinstance(performance_process_dict, str):
+        try:
+            performance_process_dict = json.loads(performance_process_dict)
+            try:
+                performance_dict.update(performance_process_dict)
+            except Exception as e:
+                status += "Error parsing performance_process_dict: {error}.format(error=e)"
+        except json.JSONDecodeError:
+            status += "Error decoding performance_process_dict: {error}.format(error=e)"
+
+    performance_list = []
+    performance_dict.update({
+        'candidate_list_view': performance_list,
+    })
 
     # # Remove "&page=" and everything after
     # if "&page=" in current_page_url:
@@ -760,7 +770,7 @@ def candidate_list_view(request):
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
     #  in linked politician
     number_to_update = 1000
-    t0 =time()
+    t0 = time()
     seo_friendly_path_updates = True
     if seo_friendly_path_updates and run_scripts:
         seo_friendly_path_updates_status = ""
@@ -1263,7 +1273,7 @@ def candidate_list_view(request):
     t1 = time()
     performance_snapshot = {
         'name': 'RetrieveCandidateListFromFilteredCandidateWeVoteIdList',
-        'description': 'Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list',
+        'description': 'Retrieve candidate_list from the filtered_candidate_we_vote_id_list',
         'time_difference': t1 - t0,
     }
     performance_list.append(performance_snapshot)
@@ -1337,11 +1347,10 @@ def candidate_list_view(request):
         logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot = {
         'name': 'DetermineFacebookUrlWithoutPhoto',
         'description': 'Determine how many facebook_url do not have facebook_profile_image_url',
-        'time_difference': time_difference,
+        'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
 
@@ -1503,11 +1512,10 @@ def candidate_list_view(request):
     candidate_list = modified_candidate_list
 
     t1 = time()
-    time_difference = t1 - t0
     performance_snapshot = {
         'name': 'AttachContestOfficeInformation',
         'description': 'Attach the latest contest_office information',
-        'time_difference': time_difference,
+        'time_difference': t1-t0,
     }
     performance_list.append(performance_snapshot)
 
@@ -1585,13 +1593,13 @@ def candidate_list_view(request):
                         candidate.no_google_possibilities_found = True
             except Exception as e:
                 candidate.google_search_merge_possibility = None
-    t1 = time()
-    performance_snapshot = {
-        'name': 'AttachGoogleGuess',
-        'description': 'Attach the best guess Google search to each candidate',
-        'time_difference': t1 - t0,
-    }
-    performance_list.append(performance_snapshot)
+        t1 = time()
+        performance_snapshot = {
+            'name': 'AttachGoogleGuess',
+            'description': 'Attach the best guess Google search to each candidate',
+            'time_difference': t1 - t0,
+        }
+        performance_list.append(performance_snapshot)
 
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
         from import_export_vote_usa.controllers import VOTE_USA_API_KEY, VOTE_USA_CANDIDATE_QUERY_URL
