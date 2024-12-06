@@ -86,7 +86,7 @@ from apis_v1.documentation_source import \
     voter_split_into_two_accounts_doc, \
     voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc, voter_twitter_save_to_current_account_doc, \
-    voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc
+    voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc, backup_one_table_to_s3_doc
 from config.base import get_environment_variable
 from voter.models import voter_setup
 from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
@@ -1269,6 +1269,17 @@ def sitewide_election_metrics_sync_out_doc_view(request):
         sitewide_election_metrics_sync_out_doc.sitewide_election_metrics_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def backup_one_table_to_s3_doc_view(request):
+    """
+    Show documentation about backupOneTableToS3
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = backup_one_table_to_s3_doc.backup_one_table_to_s3_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
 
 
 def sitewide_voter_metrics_sync_out_doc_view(request):

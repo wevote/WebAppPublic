@@ -3,9 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 import json
+import os
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from io import StringIO
 
 import psycopg2
@@ -354,3 +355,98 @@ def fast_load_status_update(request):
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+def make_filename_and_command(table_name):
+    db_name = get_environment_variable('DATABASE_NAME')
+    db_user = get_environment_variable('DATABASE_USER')
+    db_password = get_environment_variable('DATABASE_PASSWORD')
+    db_host = get_environment_variable('DATABASE_HOST')
+    db_port = get_environment_variable('DATABASE_PORT')
+
+    tmp_file_name = f"/tmp/backup-{table_name}-{time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}.backup"
+
+    command_str = f"pg_dump 'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}' --table='{table_name}' --format='c' --file='{tmp_file_name}' --disable-triggers"
+    # pg_dump 'postgresql://postgres:<password>@localhost:5432/postgres' --table='"employees"' --format='t' --file='D:\ddd.txt' --data-only --disable-triggers
+    # command_str = (f"pg_dump -Fc -h {db_host[0]} -p {db_port} -d {db_name[0]} -U {db_user[0]} -W {db_password[0]} -t {table_name} > {tmp_file_name}")
+
+    return  tmp_file_name, command_str
+
+def dump_full_postgres_table_to_tmp(table_name):
+    success = False,
+    results = {
+        'success': False,
+    }
+    if table_name not in allowable_tables:
+        results = {
+            'status': f"Table {table_name} in not on the allowable tables list!",
+        }
+    else:
+        temp_file_name, command_str = make_filename_and_command(table_name)
+
+        try:
+            os.system(command_str)
+            print("Dump completed")
+            results['success'] = True
+            results['temp_file_name'] = temp_file_name
+            results['status'] = f"tmp file {temp_file_name} created"
+
+        except Exception as e:
+            print("!!Problem occurred!!", e)
+            results['success'] = False,
+            results['error string'] = str(e)
+    return results
+
+def backup_one_table_to_s3_controller(voter_api_device_id, table_name):
+    t0 = time.time()
+    results = {
+        'success': True,
+        'status': '',
+        'aws_s3_file_url': '',
+    }
+
+    if table_name not in allowable_tables:
+        results['success'] = False
+        results['status'] = f"Table {table_name} in not on the allowable tables list!"
+    else:
+        # command_str, filename = make_filename_and_command(table_name)
+        try:
+            import boto3
+            AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
+            AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
+            AWS_REGION_NAME = get_environment_variable("AWS_REGION_NAME")
+            AWS_STORAGE_BUCKET_NAME = get_environment_variable("AWS_STORAGE_BUCKET_NAME")
+            AWS_STORAGE_SERVICE = "s3"
+
+            session = boto3.session.Session(region_name=AWS_REGION_NAME,
+                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+            s3 = session.resource(AWS_STORAGE_SERVICE)
+
+            ts = '{:.2f} seconds'.format(time.time() - t0)
+            print(f"About to dump table at {ts} seconds")
+            results = dump_full_postgres_table_to_tmp(table_name)
+            ts: str = '{:.2f} seconds'.format(time.time() - t0)
+            results['dump_table_to_tmp_completed'] = ts
+
+            head, tail = os.path.split(results['temp_file_name'])
+
+            date_tomorrow = datetime.now() + timedelta(days=2)
+
+            ts = '{:.2f} seconds'.format(time.time() - t0)
+            print(f"About to upload to S3 at {ts} seconds")
+
+            s3.Bucket(AWS_STORAGE_BUCKET_NAME).upload_file(
+                results['temp_file_name'], tail, ExtraArgs={'Expires': date_tomorrow, 'ContentType': 'text/html'})
+            aws_s3_file_url = "https://{bucket_name}.s3.amazonaws.com/{file_location}" \
+                          "".format(bucket_name=AWS_STORAGE_BUCKET_NAME, file_location=tail)
+            ts = '{:.2f} seconds'.format(time.time() - t0)
+            results['tmp_file_to_s3_completed'] = str(ts)
+
+            print(f"Done with upload to S3 at {ts} seconds")
+            results['status'] += ', s3 upload completed'
+            results['aws_s3_file_url'] = aws_s3_file_url
+
+        except Exception as e:
+            results.status = 'Error ' + str(e)
+
+    return results
