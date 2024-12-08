@@ -363,7 +363,7 @@ def make_filename_and_command(table_name):
     db_host = get_environment_variable('DATABASE_HOST')
     db_port = get_environment_variable('DATABASE_PORT')
 
-    tmp_file_name = f"/tmp/backup-{table_name}-{time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}.backup"
+    tmp_file_name = f"/tmp/backup-{table_name}-{time.strftime('%Y-%m-%dT%H:%M:%S')}.backup"
 
     command_str = f"pg_dump 'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}' --table='{table_name}' --format='c' --file='{tmp_file_name}' --disable-triggers"
     # pg_dump 'postgresql://postgres:<password>@localhost:5432/postgres' --table='"employees"' --format='t' --file='D:\ddd.txt' --data-only --disable-triggers
