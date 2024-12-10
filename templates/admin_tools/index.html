@@ -166,7 +166,7 @@
 {# ################## #}
 <h2>Maintenance</h2>
     <p><a href="{% url 'apis_v1:apisIndex' %}">API Documentation</a></p>
-    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
+    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Fast Load (or Sync) Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Batch Process Status List</a></p>
     <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
@@ -197,6 +197,10 @@
         <tr>
             <td>Postgres:&nbsp;&nbsp;</td>
             <td>{{ postgres_version }}</td>
+        </tr>
+        <tr>
+            <td>pg_dump:&nbsp;&nbsp;</td>
+            <td>{{ pg_dump_version }}</td>
         </tr>
         <tr>
             <td>Git commit hash:</td>
