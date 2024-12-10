@@ -44,7 +44,7 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, get_git_commit_hash, \
-    get_git_commit_date
+    get_git_commit_date, get_pg_dump_version
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -128,6 +128,7 @@ def admin_home_view(request):
         'git_commit_hash_url':                get_git_commit_hash(True),
         'git_commit_date':                    get_git_commit_date(),
         'postgres_version':                   get_postgres_version(),
+        'pg_dump_version':                    get_pg_dump_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
         'shared_links_count':                 shared_links_count,

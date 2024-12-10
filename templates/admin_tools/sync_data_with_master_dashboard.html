@@ -7,11 +7,12 @@
 {% load template_filters %}
 
 <h1>Fast Load Data From We Vote Master Servers</h1>
-<div style="padding: 25px 0 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
-    If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and in about
-    an hour (on a fast Mac), it will have loaded and stored all the election data we have for all elections and for all the states.
-    If you want to update to current election data, and don't care about overwriting your existing election data,
-    "FAST LOAD" is all you need.  The Python logging screen shows progress as the tables are loaded.
+<div style="padding: 10px 0 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
+    If you are loading election data for the first time to your local postgres, press the <b>"FAST LOAD"</b> button below, and in about
+    an hour (on a fast Mac), it will have overwritten (or initialized) your local database with all the tables we need for running
+    a local development WeVoteServer server.
+    <br>
+    The Python logging screen shows progress as the tables are loaded.
     <br>
 
     <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
@@ -19,22 +20,27 @@
     <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
         <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
         <progress id="progress" value="0" max="100" style="display: none"></progress>
+        <div id="table_count" style="padding-top: 10px"></div>
         <div id="current_table"></div>
-        <div id="current_status"></div>
         <div id="total_time"></div>
-        <div id="completion"></div>
+        <div id="current_status"></div>
     </div>
 </div>
-<p style="padding-left:  25px;">
-    If you are working with specific election data, and may have made local changes that you want to preserve, then the
-    "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big
-    state, or a national election.)
-</p>
 <br>
 
 <h1>Sync Data With Master We Vote Servers</h1>
 
-<p>These imports are best run in order from top-to-bottom.</p>
+<p style="padding: 10px 0 5px 25px; font-size: 18px;">
+    If you are working with specific election data, and may have made local changes that you want to preserve, then the
+    "Sync Data With Master We Vote Servers" tools that follow are for you.  (Syncing data can take many hours for a big
+    state, or a national election.)
+<br><br>
+These imports are best run in order from top-to-bottom.
+<br><br>
+</p>
+
+
+<p></p>
 
 <form name="candidate_choose_election" method="get" action="{% url 'admin_tools:sync_dashboard' %}">
     {% csrf_token %}
@@ -218,7 +224,6 @@
                 <input type="hidden" id="started_original_update" name="started_original_update" value="stop">
                 <input type="hidden" id="state_code" name="state_code" value="{{ state_code }}">
                 <br/>
-                <div id="realTimeStatusPollingLocations" style=" margin: 5px 0 0 30px;"></div>
             </form>
         </td>
         {% else %}
@@ -296,26 +301,6 @@
         return ''
     }
 
-    function getEstimatedCompletionTime (t0, current_record, total_records) {
-        if (current_record === 0) {
-            return ["", ""]
-            {#return 'Save off estimated duration is 40 seconds';#}
-        }
-        const t1 = new Date().getTime();
-        const dt = t1 - t0;
-        const percentComplete = current_record / total_records;
-        {#console.log('percent complete: ', percentComplete);#}
-        const totalEstimate = dt / percentComplete;
-        {#console.log('totalEstimate: ', totalEstimate);#}
-        const timeLeftSec = Math.trunc((totalEstimate - dt)/1000);
-        const timeLeftMin = Math.trunc(timeLeftSec / 60);
-        const secRemainder = timeLeftSec - (60 * timeLeftMin);
-        const timeElapsedMin = dt/60000;
-        let stat = `${timeLeftMin} min ${secRemainder} sec`
-        let elapsed = `${timeElapsedMin.toFixed(1)} minutes`
-        return [stat, elapsed];
-    }
-
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
@@ -338,7 +323,7 @@
 
     const fastLoadButton = $("#fastLoadButton");
     const progress = $("#progress");
-    const completion = $("#completion");
+    const table_count = $("#table_count");
     const current_status = $("#current_status");
     const current_table = $("#current_table");
     const total_time = $("#total_time");
@@ -349,73 +334,37 @@
     let saveOffDBComplete = false;
 
     let counter = 0;
-    setInterval(function () {
-      {#let origin = new URL('{{request.build_absolute_uri}}').origin;   was local host#}
-      let origin = 'https://api.wevoteusa.org';
-      let apiURL = origin + '/pl/import_status/';
-      let startedOriginalElement = document.getElementById('started_original_update');
-      let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
+    const regex = /(.*?)\/admin/gm;
+    const localOrigin = regex.exec(window.location.href);
+    const apiURL = localOrigin[1] + '/retrieve_tables/import/status/?';
 
-      {#console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());#}
-      if (startedOriginal === 'start') {
+    setInterval(function () {
+      if ( startedFastUpdate.val() === 'true') {
+        console.log("started fast sync_data cycle " + counter++ + " ---- ", startedFastUpdate.val());
         $.ajax({
           type: "GET",
           url: apiURL,
-          params: {'counter': counter++},
+          params: {},
           success: function (data) {
-            let status = data.text;
-            // console.log('realTimeStatusPollingLocations', status);
-            $('#realTimeStatusPollingLocations').html('<font color="LIMEGREEN">' + status + '</font>');
+            {#console.log(data);#}
+            let percent =  Math.round((data.step/(data.num_tables * 2)) * 100);
+            progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(percent);
+            if (data.elapsed < 60) {
+              total_time.text(`Elapsed time: ${data.elapsed} seconds`);
+            } else {
+              let mins = Math.round(data.elapsed/60);
+              let secs = data.elapsed - (mins*60);
+              total_time.text(`Elapsed time: ${mins}:${secs} minutes`);
+            }
+
+            current_table.html(`Current table: ${data.table_name}`);
+            table_count.text(`Table: ${data.count} of ${data.num_tables}`);
           },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log('ERROR status from /retrieve_tables/import/status', textStatus);
+          },
+
         });
-      }
-      const voterApiDeviceId = getApiDeviceId();
-      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?initialize=' + fastInit.val() +
-          '&counter=' + (counter++) + '&voter_api_device_id=' + voterApiDeviceId;
-      if (fastInit.val() === 'true') {
-        fastInit.val("false")
-      }
-      if (startedFastUpdate.val() === 'true') {
-
-          $.ajax({
-              type: "GET",
-              url: apiUrlFastLoadStatus,
-              success: function (data) {
-                  // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
-                  if (fastLoadButton.html().startsWith('...')) {
-                      let newHtml = '';
-                      if (data.current_record === 0) {
-                          newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
-                          countCopy += 1.5;
-                          prog = Math.trunc(countCopy);
-                      } else {
-                          if (!saveOffDBComplete) {
-                              saveOffDBComplete = true;
-                              progress.val(prog);  // Reset the progress bar after saving off completes
-                          }
-                          newHtml = `.... loading tables`;
-                          prog = ((data.current_record / data.total_records) * 100);
-                      }
-                      // console.log('progress ======= ', prog);
-                      progress.val(prog);
-                      let current = data.current_record.toLocaleString() || 0;
-                      let total = data.total_records.toLocaleString() || 0;
-                      let table_name = data.table_name || "";
-                      current_table.text(`Current table: ${table_name}`);
-                      if (table_name.length > 0) {
-                          current_status.text(`Processing: ${current} of ${total} records\n`);
-                      }
-                      let [stat, elapsed] = getEstimatedCompletionTime(t0, data.current_record, data.total_records);
-                      completion.text(`Estimated time remaining: ${stat}`);
-                      total_time.text(`Elapsed time: ${elapsed}`);
-                      fastLoadButton.html(newHtml);
-
-                  }
-              },
-              error: function (XMLHttpRequest, textStatus, errorThrown) {
-                  console.log('ERROR status from fastLoadStatusRetrieve', textStatus);
-              },
-          });
       }
     }, 1000);
 
@@ -425,7 +374,7 @@
 
       if (!fastLoadButton.html().includes('.....')) {
         progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(0);
-        fastLoadButton.html("... Loading all data from the master server, this takes about an hour ...").css('background-color', '#FFFF00');
+        fastLoadButton.html("... Migrating all data from the master server, this takes about an hour ...").css('background-color', '#FFFF00');
 
         let origin = new URL('{{request.build_absolute_uri}}').origin;
         const apiURL = origin + '/retrieve_tables/import/files/?';
@@ -434,15 +383,20 @@
           url: apiURL,
           headers: { 'voterApiDeviceId': getApiDeviceId() },
           success: function (data) {
-            let status = data.text;
+            // let status = data.text;
             // console.log(status);
             fastLoadButton.html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
+            comp = table_count.text().replace('Table: ', '').replace('of', 'out of the');
+            compTxt = `Completed loading ${comp} tables in `
+            total_time.text(total_time.text().replace('Elapsed time:', compTxt));
+            table_count.text("")
+            current_table.text("");
             startedFastUpdate.val("false");
             progress.val(100);
-            const t1 = new Date().getTime();
-            const dt = t1 - t0;
-            const minutes = Math.trunc(dt/60000);
-            completion.text('Completed in ' + minutes + ' minutes');
+            progress.fadeOut(6000);
+            setTimeout(function() {
+
+            }, 4000);
             },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
             fastLoadButton.html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');

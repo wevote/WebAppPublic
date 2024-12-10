@@ -100,3 +100,16 @@ def get_postgres_version():
         pass
     print('Postgres version: ', formatted)
     return formatted
+
+
+def get_pg_dump_version():
+    raw = os.popen('pg_dump --version').read()
+    #  "pg_dump (PostgreSQL) 14.14 (Homebrew)"
+    version = 'pg_dump not installed on this server'
+    if len(raw) > 0:
+
+        match = re.search(r"\d{1,2}.\d{1,2}", raw)
+        if match:
+            version = match.group(0)
+    print('pg_dump version: ' + version)    # Something like 'v14.15'
+    return version
