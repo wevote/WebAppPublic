@@ -65,8 +65,19 @@ def measure_delete_process_view(request):
     results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id=measure_id)
     if results['contest_measure_found']:
         contest_measure = results['contest_measure']
-        contest_measure.delete()
-        messages.add_message(request, messages.INFO, 'Measure deleted.')
+        # if positions are still attached, then don't proceed with deleting the measure
+        position_list_manager = PositionListManager()
+        retrieve_public_positions = True  # The alternate is positions for friends-only
+        position_list = position_list_manager.retrieve_all_positions_for_contest_measure(
+            retrieve_public_positions, contest_measure_id=measure_id, contest_measure_we_vote_id=contest_measure.we_vote_id, stance_we_are_looking_for='ANY_STANCE')
+        if positive_value_exists(len(position_list)):
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'positions still attached to this measure.')
+            return HttpResponseRedirect(reverse('measure:measure_edit', args=(measure_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id))
+        else:
+            contest_measure.delete()
+            messages.add_message(request, messages.INFO, 'Measure deleted.')
     else:
         messages.add_message(request, messages.ERROR, 'Measure not found.')
 
