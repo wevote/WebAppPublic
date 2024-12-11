@@ -64,7 +64,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 {% else %}
     {# NEW ENTRY #}
 
-    {% if election_list %}
 <div class="form-group">
     <label for="google_civic_election_id" class="col-sm-2 control-label">Election</label>
     <div class="col-sm-9">
@@ -85,7 +84,6 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         </label>
     </div>
 </div>
-    {% endif %}
 
     <div class="form-group">
         <label for="state_id" class="col-sm-2 control-label">State</label>
