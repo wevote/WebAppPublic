@@ -34,7 +34,12 @@
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-
+    {% if state_code != "" %}
+        <a href="#" onclick="showAllStates(); return false;">
+            show all states</a>
+        <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
+            show all states</a> -->
+    {% endif %}
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
@@ -45,12 +50,7 @@
                 {{ state }}</option>
         {% endfor %}
         </select>
-        {% if state_code != "" %}
-            <a href="#" onclick="showAllStates(); return false;">
-                show all states</a>
-        <!-- <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&issue_search={{ issue_search }}">
-            show all states</a> -->
-        {% endif %}
+
     {% endif %}{# End of if state_list #}
 
     <br />
@@ -149,44 +149,44 @@
     </p>
 {% endif %}
 
-    <script>
-        function displayLoadingBanner() {
-            document.getElementById('FilterPopupMessage').style.display = "block";
-        }
+<script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
 
-        function clearSearch() {
+    function clearSearch() {
+        displayLoadingBanner();
+        $('#issue_search_id').val('');
+        $('form[name="issue_choose_election"]').submit();
+    }
+
+    function showAllStates() {
+        displayLoadingBanner();
+        $('#state_code_id').val('');
+        $('form[name="issue_choose_election"]').submit();
+    }
+
+    $(function() {
+        $('#google_civic_election_id').change(function() {
             displayLoadingBanner();
-            document.getElementById('issue_search_id').value = "";
-            document.forms['issue_choose_election'].submit();
-        }
-
-        function showAllStates() {
-            displayLoadingBanner();
-            document.getElementById('state_code_id').value = "";
-            document.forms['issue_choose_election'].submit();
-        }
-
-        $(function() {
-            $('#google_civic_election_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_all_elections_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#state_code_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('form[name="issue_choose_election"]').submit(function(event) {
-                displayLoadingBanner();
-            });
+            this.form.submit();
         });
 
-    </script>
+        $('#show_all_elections_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#state_code_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('form[name="issue_choose_election"]').submit(function(event) {
+            displayLoadingBanner();
+        });
+    });
+
+</script>
 
 {% endblock %}

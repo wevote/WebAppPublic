@@ -226,64 +226,66 @@
     >Recalculate Log Entry count statistics for this state ({{ state_code }})</a>
 <br />
 <input type="hidden" id="state_list" value="{{ state_list }}">
-    <script>
-        const sourceCodeList = {{ source_code_list|safe }};
-        console.log("Source Code List:", sourceCodeList);
-        function displayLoadingBanner() {
-            document.getElementById('FilterPopupMessage').style.display = 'block';
-        }
 
-        function clearSearch() {
+<script>
+    const sourceCodeList = {{ source_code_list|safe }};
+    console.log("Source Code List:", sourceCodeList);
+
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
+
+    function clearSearch() {
+        displayLoadingBanner();
+        $('#polling_location_id').val('');
+        $('form[name="polling_location_search_form"]').submit();
+    }
+
+    $(function() {
+        $('#show_ctcl_errors_id').change(function() {
             displayLoadingBanner();
-            document.getElementById('polling_location_id').value = '';
-            document.forms['polling_location_search_form'].submit();
-        }
-
-        $(function() {
-            $('#show_ctcl_errors_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_vote_usa_errors_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_successful_retrieves_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_no_contests_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_bulk_retrieve_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_POST_OFFICE_LAT_LONG_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#show_PUBLIC_SCHOOLS_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('#state_code').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-
-            $('form[name="polling_location_search_form"]').submit(function(event) {
-                displayLoadingBanner();
-            });
+            this.form.submit();
         });
-    </script>
+
+        $('#show_vote_usa_errors_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_successful_retrieves_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_no_contests_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_bulk_retrieve_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_POST_OFFICE_LAT_LONG_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_PUBLIC_SCHOOLS_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#state_code').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('form[name="polling_location_search_form"]').submit(function(event) {
+            displayLoadingBanner();
+        });
+    });
+</script>
 
 {% endblock %}

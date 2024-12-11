@@ -292,29 +292,33 @@
     <br />
     <br />
     <br />
-    <script>
+<script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
 
     function clearSearch() {
         displayLoadingBanner();
-        document.getElementById('voter_guide_possibility_search_id').value = '';
-        document.forms['voter_guide_choose_election'].submit();
+        $('#voter_guide_possibility_search_id').val('');
+        $('form[name="voter_guide_choose_election"]').submit();
     };
-    function displayLoadingBanner() {
-        document.getElementById('FilterPopupMessage').style.display ='block';
-    };
+
     $(function() {
         $('#assigned_to_voter_we_vote_id_id').change(function() {
             displayLoadingBanner()
             this.form.submit();
         });
+
         $('#google_civic_election_id').change(function() {
             displayLoadingBanner()
             this.form.submit();
         });
+
         $('#show_all_elections_id').change(function() {
             displayLoadingBanner()
             this.form.submit();
         });
+
         $('#show_number_of_ballot_items_id').change(function() {
             displayLoadingBanner()
             this.form.submit();
@@ -324,6 +328,5 @@
             displayLoadingBanner();
         });
     });
-
-    </script>
+</script>
 {% endblock %}

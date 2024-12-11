@@ -20,6 +20,11 @@
 <form name="organization_position_choose_election" method="get" action="{% url 'office_held:office_held_list' %}">
 {% csrf_token %}
 
+{% if state_code != "" %}
+<a href="#" onclick="showAllStates(); return false;">
+    show all states</a>
+{% endif %}
+
 {% if state_list %}
 <select id="state_code_id" name="state_code">
     <option value="">
@@ -103,14 +108,22 @@
 </form>
 
 <script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
+
     function clearSearch() {
         displayLoadingBanner();
-        document.getElementById('office_held_search_id').value = '';
-        document.forms['organization_position_choose_election'].submit();
+        $('#office_held_search_id').val('');
+        $('form[name="organization_position_choose_election"]').submit();
     }
-    function displayLoadingBanner() {
-        document.getElementById('FilterPopupMessage').style.display = 'block';
+
+    function showAllStates() {
+        displayLoadingBanner();
+        $('#state_code_id').val('');
+        $('form[name="organization_position_choose_election"]').submit();
     }
+
     $(function() {
         $('#show_all_elections_id').change(function() {
             displayLoadingBanner();
