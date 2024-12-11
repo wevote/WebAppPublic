@@ -166,7 +166,7 @@ Then confirm that the default python is now version 3.11 or later.
      ```
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version
      Python 2.7.18
-     stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % export PATH="/opt/homebrew/opt/python@3.9/libexec/bin:$PATH"
+     stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % export PATH="/opt/homebrew/opt/python@3.11/libexec/bin:$PATH"
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version                                            
      Python 3.11.4
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
@@ -206,12 +206,12 @@ PyCharm and opening a new one.
      `(3.11.8) $ brew install openssl`
      If it is already installed, no worries!
 
-29. Link libssl and libcrypto so that pip can find them:
+29. Link libssl and libcrypto so that pip can find them. If this step fails you can continue with the rest of the installation:
      ```
      $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
      $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
      ```
-30. Install libmagic
+30. Install libmagic. If this fails you can continue with the rest of the installation:
 
      `(3.11.8) $ brew install libmagic`
 
@@ -227,7 +227,7 @@ PyCharm and opening a new one.
      **Note July 2022 if this fails due to `psycopg2-binary` requiring `pg_config` (which is installed with postgres), install Postgres first then come back and do the pip3 install -r requirements.txt` command.**
     
      If this installation succeeds with no missing libraries, or other compiler errors, we are
-     almost done.  If this installation fails, please ask for help.
+     almost done.  If this installation fails, you might need to comment out all lines in the requirements.txt file that have the comment `# recommend engine` on the end of the line, and then run the command above again.
 
 
 ## Install and set up PostgreSQL and pgAdmin4
@@ -758,7 +758,7 @@ In order to run all these AWS features locally on your Mac, do the following:
 5) Check to see if awslocal is installed
     ```
    ( venv2) stevepodell@StevesM1Dec2021 WeVoteServer % awslocal --version
-    aws-cli/2.9.13 Python/3.9.11 Darwin/22.3.0 exe/x86_64 prompt/off
+    aws-cli/2.9.13 Python/3.11.4 Darwin/22.3.0 exe/x86_64 prompt/off
     (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % 
    ```
 6) if aws (awslocal) is not available at the command line, follow instructions at
