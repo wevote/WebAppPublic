@@ -78,6 +78,13 @@
     </select>
     {% endif %}{# End of if election_years_available #}
 
+    {% if state_code != "" %}
+        <a href="#" onclick="showAllStates(); return false;">
+            show all states</a>
+        <!-- <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            show all states</a> -->
+    {% endif %}
+    
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
@@ -88,12 +95,7 @@
                 {{ state }}</option>
         {% endfor %}
         </select>
-        {% if state_code != "" %}
-            <a href="#" onclick="showAllStates(); return false;">
-                show all states</a>
-        <!-- <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
-            show all states</a> -->
-        {% endif %}
+
         &nbsp;&nbsp;
     {% endif %}{# End of if state_list #}
 
@@ -214,22 +216,23 @@
 {% endif %}
 {#    <p><a href="{% url 'position:position_new' %}">Add New Position</a></p>#}
 
-    <script>
+<script>
     function displayLoadingBanner() {
-        document.getElementById('FilterPopupMessage').style.display = 'block';
+        $('#FilterPopupMessage').show();
     }
 
     function clearSearch() {
         displayLoadingBanner();
-        document.getElementById('position_search_id').value = '';
-        document.forms['organization_position_choose_election'].submit();
+        $('#position_search_id').val('');
+        $('form[name="organization_position_choose_election"]').submit();
     }
 
     function showAllStates() {
         displayLoadingBanner();
-        document.getElementById('state_code_id').value = '';
-        document.forms['organization_position_choose_election'].submit();
+        $('#state_code_id').val('');
+        $('form[name="organization_position_choose_election"]').submit();
     }
+
     $(function() {
         $('#google_civic_election_id').change(function() {
             displayLoadingBanner();
@@ -266,23 +269,6 @@
         $('form[name="organization_position_choose_election"]').submit(function(event) {
             displayLoadingBanner();
         });
-    });
-    $(function() {
-
-    });
-
-    $(function() {
-
-    });
-
-    $(function() {
-
-    });
-    $(function() {
-
-    });
-    $(function() {
-
     });
     </script>
 

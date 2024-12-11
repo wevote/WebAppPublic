@@ -52,6 +52,11 @@
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}
 
+    {% if state_code != "" %}
+    <a href="#" onclick="showAllStates(); return false;">
+        show all states</a>
+    {% endif %}
+
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
@@ -62,10 +67,6 @@
                 {{ state }}</option>
         {% endfor %}
         </select>
-        {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}&{{ checkbox_url_variables }}">
-            <span onclick={displayLoadingBanner()}>show all states</span></a>&nbsp;&nbsp;&nbsp;
-        {% endif %}
     {% endif %}{# End of if state_list #}
 
     {% if politician_search %}
@@ -256,90 +257,84 @@
     </p>
 {% endif %}
 
-    <script>
+<script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
 
-        function displayLoadingBanner() {
-            console.log("displayLoadingBanner triggered");
-            document.getElementById('FilterPopupMessage').style.display = 'block';
-        }
-        function clearSearch() {
-            console.log("clearSearch triggered");
+    function clearSearch() {
+        displayLoadingBanner();
+        $('#politician_search_id').value = '';
+        $('form[name="state_code_form"]').submit();
+    }
+
+    function showAllStates() {
+        displayLoadingBanner();
+        $('#state_code_id').val('');
+        $('form[name="state_code_form"]').submit();
+    }
+
+    $(function() {
+        $('#exclude_politician_analysis_done_id').change(function() {
             displayLoadingBanner();
-            document.getElementById('politician_search_id').value = '';
-            document.forms['state_code_form'].submit();
-        }
-        $(function() {
-            $('#exclude_politician_analysis_done_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#hide_politicians_with_photos_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#organization_manual_intervention_needed_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#show_all_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#show_battleground_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#show_politicians_with_email_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#show_related_candidates_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-       $(function() {
-            $('#show_ocd_id_state_mismatch_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#state_code_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#politician_search_submit').click(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
-        });
-        $(function() {
-            $('#was_candidate_recently_id').change(function() {
-                displayLoadingBanner();
-                this.form.submit();
-            });
+            this.form.submit();
         });
 
-        $(function() {
-            $('form[name="state_code_form"]').submit(function(event) {
-                displayLoadingBanner();
-            });
-        })
-    </script>
+        $('#hide_politicians_with_photos_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#organization_manual_intervention_needed_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_all_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_battleground_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_politicians_with_email_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_related_candidates_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_ocd_id_state_mismatch_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#state_code_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#politician_search_submit').click(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#was_candidate_recently_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('form[name="state_code_form"]').submit(function(event) {
+            displayLoadingBanner();
+        });
+    });
+
+</script>
 
 {% endblock %}

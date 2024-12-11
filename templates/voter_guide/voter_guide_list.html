@@ -223,15 +223,15 @@
     <p></p>
     <br />
     <br />
-    <script>
-    function clearSearch() {
-        displayLoadingBanner();
-        document.getElementById('voter_guide_search_id').value = '';
-        document.forms['voter_guide_choose_election'].submit();
+<script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
     }
 
-    function displayLoadingBanner() {
-        document.getElementById('FilterPopupMessage').style.display = 'block';
+    function clearSearch() {
+        displayLoadingBanner();
+        $('#voter_guide_search_id').val('');
+        $('form[name="voter_guide_choose_election"]').submit();
     }
 
     $(function() {
@@ -259,5 +259,5 @@
             displayLoadingBanner();
         });
     });
-    </script>
+</script>
 {% endblock %}

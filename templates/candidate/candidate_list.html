@@ -80,6 +80,11 @@
     &nbsp;&nbsp;&nbsp;&nbsp;
     <input type="hidden" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
 
+    {% if state_code != "" %}
+    <a href="#" onclick="showAllStates(); return false;">
+        show all states</a>
+    {% endif %}
+
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
@@ -90,11 +95,11 @@
                 {{ state }}</option>
         {% endfor %}
         </select>
-        {% if state_code != "" %}
+        <!-- {% if state_code != "" %}
 {#        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">#}
             <span class="u-link-color u-link-underline-on-hover" onClick={showAllStates("candidate_choose_election_id")}>show all states</span>
         </a>
-        {% endif %}
+        {% endif %} -->
     {% endif %}{# End of if state_list #}
 </form>
 
@@ -805,74 +810,114 @@
 <br />
 <br />
 <br />
-    <script>
+
+<script>
+    function displayLoadingBanner() {
+        $('#FilterPopupMessage').show();
+    }
+
     function clearSearch() {
         displayLoadingBanner();
-        document.getElementById('candidate_search_id').value = '';
-        document.forms['candidate_search'].submit();
+        $('#candidate_search_id').val('');
+        $('form[name="candidate_search"]').submit();
     }
+
     function hideElement(elementId) {
       var x = document.getElementById(elementId);
       x.style.display = "none";
     }
+
     function showElement(elementId) {
       var x = document.getElementById(elementId);
       x.style.display = "block";
     }
-    function showAllStates(currentFormId) {
+
+    function showAllStates() {
         displayLoadingBanner();
-        const currentForm = document.getElementById(currentFormId);
-        currentForm.state_code.value = '';
-        currentForm.submit();
+        $('#state_code_id').val('');
+        $('form[name="candidate_choose_election"]').submit();
     }
+
     $(function() {
         $('#exclude_candidate_analysis_done_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
 
-function displayLoadingBanner() {
-    document.getElementById('FilterPopupMessage').style.display = 'block';
-}
-$(function() {
-    $('#google_civic_election_id').change(function() {
+        $('#google_civic_election_id').change(function() {
            displayLoadingBanner();
            this.form.submit();
-    });
-});
-    $(function() {
+        });
+
         $('#review_mode_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#federal_or_state_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#hide_candidates_with_links_id').change(function() {
             displayLoadingBanner();
             this.form.hide_candidates_with_photos_id.value = '0';
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#hide_candidates_with_photos_id').change(function() {
             displayLoadingBanner();
             this.form.hide_candidates_with_links_id.value = '0';
             this.form.submit();
         });
-    });
-    $(function() {
+
         $('#no_supporters_id').change(function() {
             displayLoadingBanner();
             this.form.submit();
         });
+
+        $('#show_candidates_without_twitter_id').change(function() {
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            {#this.form.show_candidates_with_twitter_options_id.value = '0';#}
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_all_elections_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_election_statistics_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_marquee_or_battleground_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_this_year_of_candidates_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#state_code_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('#show_candidates_with_email_id').change(function() {
+            displayLoadingBanner();
+            this.form.submit();
+        });
+
+        $('form[name="candidate_search"]').submit(function(event) {
+            displayLoadingBanner();
+        });
     });
+
     {#$(function() {#}
     {#    $('#show_candidates_with_best_twitter_options_id').change(function() {#}
     {#        this.form.show_candidates_with_twitter_options_id.value = '0';#}
@@ -887,55 +932,7 @@ $(function() {
     {#        this.form.submit();#}
     {#    });#}
     {# }); #}
-    $(function() {
-        $('#show_candidates_without_twitter_id').change(function() {
-            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
-            {#this.form.show_candidates_with_twitter_options_id.value = '0';#}
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_all_elections_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_election_statistics_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_marquee_or_battleground_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_this_year_of_candidates_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#state_code_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_candidates_with_email_id').change(function() {
-            displayLoadingBanner();
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('form[name="candidate_search"]').submit(function(event) {
-            displayLoadingBanner();
-        });
-    })
-    </script>
+ 
+</script>
 
 {% endblock %}
