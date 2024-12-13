@@ -9,7 +9,7 @@ If you are returning to work on WeVoteServer after a few weeks or months, these 
 Pull the latest code from the repository. Then:
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.11/bin/activate
     $ pip install -r requirements.txt
     $ python manage.py makemigrations
     $ python manage.py migrate
@@ -23,7 +23,7 @@ Compare your local version of "config/environment_variables.json" with the maste
 Here are some commands we use quite a lot:
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.11/bin/activate
     $ python manage.py runserver
 
 Find API admin tools here [http://localhost:8000/admin](http://localhost:8000/admin)
