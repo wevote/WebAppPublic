@@ -41,14 +41,14 @@ Start up the WeVoteServer on Mac (You probably already installed requirements.tx
 hurt to do it again.):
 
     (WeVoteServer) $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    (WeVoteServer) $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    (WeVoteServer) $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.11/bin/activate
     (WeVoteServer) $ pip install -r requirements.txt
     (WeVoteServer) $ python manage.py runserver
 
 Start up the WeVoteServer on Linux:
 
     (WeVoteServer) $ cd ~/PythonProjects/WeVoteServer/
-    (WeVoteServer) $ source ~/PythonEnvironments/WeVoteServer3.4/bin/activate
+    (WeVoteServer) $ source ~/PythonEnvironments/WeVoteServer3.11/bin/activate
     (WeVoteServer) $ pip install -r requirements.txt
     (WeVoteServer) $ python manage.py runserver
 
