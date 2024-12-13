@@ -790,7 +790,13 @@ th, td {
                   placeholder="Note about candidate..."></textarea>
         <input type="checkbox" name="candidate_analysis_done" id="candidate_analysis_done_id" value="1"
                 {% if candidate.candidate_analysis_done %}checked{% endif %} />
-        <label for="candidate_analysis_done_id" style="font-weight: normal !important;">Candidate Analysis Complete. <span style="color: darkgray">One of our team has researched this candidate and could not find more information.</span>
+        <label for="candidate_analysis_done_id" style="font-weight: normal !important;">
+            Candidate Analysis Complete.
+            {% if candidate.candidate_analysis_done %}
+            <span style="color: darkgray">This is checked because one of our team has researched this candidate and could not find more information.</span>
+            {% else %}
+            <span style="color: darkgray">Check this box only if you have fully researched this candidate, and cannot find more information.</span>
+            {% endif %}
         </label>
     </div>
 </div>
