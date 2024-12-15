@@ -339,20 +339,22 @@ def dump_full_postgres_table_to_tmp(table_name):
         temp_file_name, command_args = make_filename_and_command(table_name)
 
         try:
+            logger.error('experiment: subprocess.run pg_dump command_args: %s', str(command_args))
             result = subprocess.run(command_args, capture_output=True)  # , shell=False
-            logger.error("experiment: subprocess.run pg_dump returncode:", result.returncode)
-            logger.error("experiment: subprocess.run pg_dump stdout: ", result.stdout)
-            logger.error("experiment: subprocess.run pg_dump stderr:", result.stderr)
-            print("Dump completed")
+            logger.error('experiment: subprocess.run pg_dump returncode: %s', str(result.returncode))
+            logger.error('experiment: subprocess.run pg_dump stdout: %s', result.stdout)
+            logger.error('experiment: subprocess.run pg_dump stderr: %s', result.stderr)
+            print('Dump completed')
             results['pg_dump_returncode'] = result.returncode
             results['success'] = True
             results['temp_file_name'] = temp_file_name
             results['status'] = f"tmp file {temp_file_name} created"
-
+            logger.error('experiment: subprocess.run pg_dump temp_file_name : %s', temp_file_name)
         except Exception as e:
             print("!!Problem occurred!!", e)
             results['success'] = False,
             results['error string'] = str(e)
+    logger.error('experiment: subprocess.run pg_dump results : %s', json.dumps(results))
     return results
 
 
