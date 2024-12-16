@@ -726,26 +726,50 @@ class VoterManager(BaseUserManager):
 
     @staticmethod
     def create_developer(first_name, last_name, email, password):
-        voter = Voter()
-        try:
-            voter.set_password(password)
-            voter.first_name = first_name
-            voter.last_name = last_name
-            voter.email = email
-            voter.is_admin = True
-            voter.is_verified_volunteer = True
-            voter.is_active = True
-            voter.save()
-            logger.debug("create_voter successfully created developer (voter) : " + first_name)
+        status = ''
+        success = True
+        voter = None
 
-        except IntegrityError as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            print("create_developer IntegrityError exception:" + str(e))
-        except Exception as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            logger.debug("create_voter general exception: " + str(e))
+        queryset = Voter.objects.filter(email=email)
+        voter_list = queryset.all()
+        if len(voter_list) > 0:
+            try:
+                voter = voter_list[0]
+                voter.set_password(password)
+                voter.is_admin = True
+                voter.is_verified_volunteer = True
+                voter.is_active = True
+                voter.save()
+            except Exception as e:
+                status += "FAILED_TO_SAVE:  " + str(e) + " "
+                success = False
+        else:
+            voter = Voter()
+            try:
+                voter.set_password(password)
+                voter.first_name = first_name
+                voter.last_name = last_name
+                voter.email = email
+                voter.is_admin = True
+                voter.is_verified_volunteer = True
+                voter.is_active = True
+                voter.save()
+                status += "create_voter successfully created developer (voter) : " + first_name + " "
 
-        return voter
+            except IntegrityError as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += "create_developer IntegrityError exception:" + str(e) + " "
+                success = False
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += "create_voter general exception: " + str(e) + " "
+                success = False
+
+        return {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
 
     @staticmethod
     def create_new_voter_account(

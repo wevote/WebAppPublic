@@ -2036,5 +2036,14 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
 
 
 def create_dev_user_view(request):
-    create_dev_user()
+    results = create_dev_user()
+    email = results['email']
+    password = results['password']
+    status = results['status']
+    success = results['success']
+
+    if success:
+        messages.add_message(request, messages.INFO, "results: " + str(status) + " Please sign in with email: " + email + " and password: " + password)
+    else:
+        messages.add_message(request, messages.ERROR, "FAILED results: " + str(status))
     return HttpResponseRedirect(reverse('login_we_vote', args=()))
