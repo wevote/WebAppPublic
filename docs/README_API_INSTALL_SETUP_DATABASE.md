@@ -70,7 +70,7 @@ data from the master server in the cloud, to your local server).
 first_name = "Samuel"
 last_name = "Adams"
 email = "samuel@adams.com"
-password = "ale1776"
+password = "GoodAle1776"
 ```
 
 3.  Remove the `# ` from the line with the "VoterManager().create_developer..." line (shown here):
