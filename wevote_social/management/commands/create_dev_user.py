@@ -3,7 +3,6 @@ from django.core.management.base import BaseCommand
 from voter.models import VoterManager
 
 
-
 class Command(BaseCommand):
     help = 'Creates an initial user for you (the developer) without setting up oAuth on this local WeVoteServer.'
 
