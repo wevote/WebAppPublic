@@ -8,15 +8,16 @@
 
 <h1>Fast Load Data From We Vote Master Servers</h1>
 <div style="padding: 10px 0 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
-    If you are loading election data for the first time to your local postgres, press the <b>"FAST LOAD"</b> button below, and in about
-    an hour (on a fast Mac), it will have overwritten (or initialized) your local database with all the tables we need for running
+    To load the election data to your local postgres, press the FAST LOAD button below, and in about
+    5 minutes (on a fast Mac), it will have overwritten your local database with all the tables we need for running
     a local development WeVoteServer server.
-    <br>
-    The Python logging screen shows progress as the tables are loaded.
+    <br><br>
+    The Python logging screen (and this page!) shows progress as the tables are loaded.
     <br>
 
     <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
     <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
+    <input type="hidden" id="elapsedSeconds" name="started_fast_init" value="0">
     <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
         <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
         <progress id="progress" value="0" max="100" style="display: none"></progress>
@@ -25,7 +26,7 @@
         <div id="total_time"></div>
         <div id="current_status"></div>
     </div>
-</div>
+</span>
 <br>
 
 <h1>Sync Data With Master We Vote Servers</h1>
@@ -326,6 +327,7 @@ These imports are best run in order from top-to-bottom.
     const table_count = $("#table_count");
     const current_status = $("#current_status");
     const current_table = $("#current_table");
+    const elapsedSeconds = $("#elapsedSeconds");
     const total_time = $("#total_time");
     const startedFastUpdate = $('#started_fast_update');
     const fastInit = $('#started_fast_init');
@@ -338,26 +340,27 @@ These imports are best run in order from top-to-bottom.
     const localOrigin = regex.exec(window.location.href);
     const apiURL = localOrigin[1] + '/retrieve_tables/import/status/?';
 
+    updateRealTime();
+
+    let prevTableName = '';
     setInterval(function () {
       if ( startedFastUpdate.val() === 'true') {
         console.log("started fast sync_data cycle " + counter++ + " ---- ", startedFastUpdate.val());
+
         $.ajax({
           type: "GET",
           url: apiURL,
           params: {},
           success: function (data) {
             {#console.log(data);#}
-            let percent =  Math.round((data.step/(data.num_tables * 2)) * 100);
-            progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(percent);
-            if (data.elapsed < 60) {
-              total_time.text(`Elapsed time: ${data.elapsed} seconds`);
-            } else {
-              let mins = Math.round(data.elapsed/60);
-              let secs = data.elapsed - (mins*60);
-              total_time.text(`Elapsed time: ${mins}:${secs} minutes`);
+            let percent =  Math.trunc((data.step/(data.num_tables * 2)) * 100);
+            // console.log(`status data: data.elapsed: ${data.elapsed} table: ${data.table_name} percent: ${percent}`);
+            if (typeof percent === "number") {
+              progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(percent);
             }
-
-            current_table.html(`Current table: ${data.table_name}`);
+            elapsedSeconds.val(data.elapsed);
+            updateDisplayedDuration(data.elapsed);
+            current_table.html(`Current table: ${data.table_name_text}`);
             table_count.text(`Table: ${data.count} of ${data.num_tables}`);
           },
           error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -368,19 +371,49 @@ These imports are best run in order from top-to-bottom.
       }
     }, 1000);
 
+    function updateDisplayedDuration(secs) {
+        if (secs < 60) {
+            total_time.text(`Elapsed time: ${secs} seconds`);
+        } else {
+            let mins = Math.trunc(secs/60);
+            let newSecs = secs - (mins*60);
+            if (newSecs < 10) {
+                newSecs = '0' + newSecs.toString();
+            }
+            // console.log(secs, mins, newSecs);
+            total_time.text(`Elapsed time: ${mins}:${newSecs} minutes`);
+        }
+    }
+
+    function updateRealTime() {
+        {#let table = current_table.text();#}
+        {#let intervalId = setInterval(function () {#}
+        {#    if (startedFastUpdate.val() === "true") {#}
+        {#        let secs = elapsedSeconds.val() || '0';#}
+        {#        secs = parseInt(secs);#}
+        {#        secs++;#}
+        {#        updateDisplayedDuration(secs);#}
+        {#        secs = secs.toString();#}
+        {#        elapsedSeconds.val(secs);#}
+        {#        console.log(elapsedSeconds.val());#}
+        {#    }#}
+        {#}, 1000);#}
+    }
+
     function fastLoadClick() {
       console.log("ON CLICK fastLoadButton");
       startedFastUpdate.val("true");
 
       if (!fastLoadButton.html().includes('.....')) {
         progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(0);
-        fastLoadButton.html("... Migrating all data from the master server, this takes about an hour ...").css('background-color', '#FFFF00');
+        fastLoadButton.html("... Migrating all data from the master server, this takes about 5 minutes ...").css('background-color', '#FFFF00');
 
         let origin = new URL('{{request.build_absolute_uri}}').origin;
         const apiURL = origin + '/retrieve_tables/import/files/?';
         $.ajax({
           type: "GET",
           url: apiURL,
+          timeout: 14400000,              // 4 hours
           headers: { 'voterApiDeviceId': getApiDeviceId() },
           success: function (data) {
             // let status = data.text;
@@ -394,10 +427,7 @@ These imports are best run in order from top-to-bottom.
             startedFastUpdate.val("false");
             progress.val(100);
             progress.fadeOut(6000);
-            setTimeout(function() {
-
-            }, 4000);
-            },
+             },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
             fastLoadButton.html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');
           },
