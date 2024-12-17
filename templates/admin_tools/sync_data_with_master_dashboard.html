@@ -340,8 +340,6 @@ These imports are best run in order from top-to-bottom.
     const localOrigin = regex.exec(window.location.href);
     const apiURL = localOrigin[1] + '/retrieve_tables/import/status/?';
 
-    updateRealTime();
-
     let prevTableName = '';
     setInterval(function () {
       if ( startedFastUpdate.val() === 'true') {
@@ -380,24 +378,8 @@ These imports are best run in order from top-to-bottom.
             if (newSecs < 10) {
                 newSecs = '0' + newSecs.toString();
             }
-            // console.log(secs, mins, newSecs);
             total_time.text(`Elapsed time: ${mins}:${newSecs} minutes`);
         }
-    }
-
-    function updateRealTime() {
-        {#let table = current_table.text();#}
-        {#let intervalId = setInterval(function () {#}
-        {#    if (startedFastUpdate.val() === "true") {#}
-        {#        let secs = elapsedSeconds.val() || '0';#}
-        {#        secs = parseInt(secs);#}
-        {#        secs++;#}
-        {#        updateDisplayedDuration(secs);#}
-        {#        secs = secs.toString();#}
-        {#        elapsedSeconds.val(secs);#}
-        {#        console.log(elapsedSeconds.val());#}
-        {#    }#}
-        {#}, 1000);#}
     }
 
     function fastLoadClick() {
