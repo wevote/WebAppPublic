@@ -73,10 +73,10 @@ email = "samuel@adams.com"
 password = "GoodAle1776"
 ```
 
-3.  Remove the `# ` from the line with the "VoterManager().create_developer..." line (shown here):
+3.  Set `allow_create` to True, so when you run the script, changes can be made to your local database.
 
 ```
-# VoterManager().create_developer(first_name, last_name, email, password)
+allow_create = True
 ```
 
 4.  Visit http://localhost:8000/voter/create_dev_user 
