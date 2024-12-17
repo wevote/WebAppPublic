@@ -76,25 +76,25 @@ def retrieve_sql_files_from_master_server(request):
 
         for table_name in allowable_tables:
             t1 = time.time()
-            global_stats['table_name'] = ('<b>Saving</b>&nbsp;&nbsp;<i>' + table_name +
+            global_stats['table_name_text'] = ('<b>Saving</b>&nbsp;&nbsp;<i>' + table_name +
                                           '</i>&nbsp;&nbsp;to s3 from the <b>master</b> server')
+            global_stats['table_name'] = table_name
             global_stats['count'] += 1
             global_stats['step'] += 1
             global_stats['elapsed'] = int(time.time() - t0)
             print(f"{global_stats['count']} -- Retrieving table {table_name}")
             url = f'{host}/apis/v1/backupOneTableToS3/'
             params = {'table_name': table_name, 'voter_api_device_id': voter_api_device_id}
-            structured_json = fetch_data_from_api(url, params)
+            structured_json = fetch_data_from_api(url, params, 100, 180)  # 3 min timeout for ballot_i
             aws_s3_file_url = structured_json['aws_s3_file_url']
             print(f"{global_stats['count']} -- Intermediate aws file {aws_s3_file_url} "
                   f"received at {time.time()-t1} seconds")
 
-            # time.sleep(1)  # TODO HACK
+            time.sleep(0.5)
 
-            global_stats['table_name'] = ('<b>Loading</b>&nbsp;&nbsp;<i>' + table_name +
+            global_stats['table_name_text'] = ('<b>Loading</b>&nbsp;&nbsp;<i>' + table_name +
                                           '</i>&nbsp;&nbsp;from s3 on the <b>local</b> server')
             restore_one_file_to_local_server(aws_s3_file_url, 'ballot_ballotitem')
-            time.sleep(1)   # TODO HACK
             global_stats['step'] += 1
             print(f"{global_stats['count']} -- Restored table {table_name} at {time.time()-t1} seconds")
 
@@ -199,7 +199,7 @@ def drop_table(engine, table_name):
             logger.error(f'FAILED_TABLE_DROP: {table_name} -- {str(e)}')
 
 
-def fetch_data_from_api(url, params, max_retries=10):
+def fetch_data_from_api(url, params, max_retries=1000, timeout=8):
     """
     Fetches data from remote Postgres database
     :param url:
@@ -210,7 +210,7 @@ def fetch_data_from_api(url, params, max_retries=10):
     for attempt in range(max_retries):
         # print(f'Attempt {attempt} of {max_retries} attempts to fetch data from api')
         try:
-            response = requests.get(url, params=params, verify=True, timeout=8)
+            response = requests.get(url, params=params, verify=True, timeout=timeout)
             if response.status_code == 200:
                 return response.json()
             else:
