@@ -5186,8 +5186,19 @@ def candidate_delete_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    candidate_id = convert_to_int(request.POST.get('candidate_id', ''))
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+    state_code = request.POST.get('state_code', '')
+    page = request.POST.get('page','')
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this candidate. '
+                             'Please check the checkbox to confirm you want to delete this candidate.')
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                    "?google_civic_election_id=" + google_civic_election_id +
+                                    "&state_code=" + state_code + "&page=" + page)
 
     # Retrieve this candidate
     candidate_on_stage_found = False
@@ -5204,7 +5215,8 @@ def candidate_delete_process_view(request):
     if not candidate_on_stage_found:
         messages.add_message(request, messages.ERROR, 'Could not find candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+                                    "?google_civic_election_id=" + google_civic_election_id +
+                                    "&state_code=" + state_code + "&page=" + page)
 
     # Are there any positions attached to this candidate that should be moved to another
     # instance of this candidate?
@@ -5225,13 +5237,18 @@ def candidate_delete_process_view(request):
         else:
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
                                                           'positions still attached to this candidate.')
-            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                    "?google_civic_election_id=" + google_civic_election_id +
+                                    "&state_code=" + state_code + "&page=" + page)
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not delete candidate -- exception.')
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                    "?google_civic_election_id=" + google_civic_election_id +
+                                    "&state_code=" + state_code + "&page=" + page)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id))
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + state_code + "&page=" + page)
 
 
 @login_required

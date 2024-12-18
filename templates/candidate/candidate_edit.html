@@ -90,8 +90,7 @@ th, td {
                {% endif %}
                <div>
                     {{ candidate.we_vote_id }}
-                    (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
-
+               
                     {% if candidate.politician_we_vote_id %}
                         &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
                         <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
@@ -811,6 +810,24 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" class="btn-primary" /></p>
 </form>
+    
+{% if candidate %}
+<form action="{% url "candidate:candidate_delete_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+  <input type="hidden" name="candidate_id" value="{{ candidate.id|default_if_none:''|default:'' }}">
+  <input type="hidden" name="google_civic_election_id" 
+         value="{{google_civic_election_id|default_if_none:0|default:0 }}">
+  <input type="hidden" name="state_code" value="{{ state_code|default_if_none:''|default:'' }}">
+  <input type="hidden" name="page" value="{{ page|default_if_none:''|default:'' }}">
+  <button type="submit" class="btn btn-danger">Delete Candidate</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <label for="confirm_delete_id">
+    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> 
+      Check to confirm that you want to permanently delete this candidate
+  </label>
+</form>
+  <br />
+{% endif %}
+    
 {% if change_log_list %}
     <br />
 <div class="form-group">
