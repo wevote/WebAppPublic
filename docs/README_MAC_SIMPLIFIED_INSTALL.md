@@ -236,15 +236,22 @@ PyCharm and opening a new one.
 this step.  To see if postgres is already running, check with lsof in a terminal window `lsof -i -P | grep -i "listen" | grep postgres`:
 
     ```
-    (venv) $ lsof -i -P | grep -i "listen" | grep postgres
+    lsof -i -P | grep -i "listen" | grep postgres
+    ```
+
+    Results:
+    ```
     postgres  13254 admin    5u  IPv6 0x35032d9cf207f247      0t0  TCP localhost:5432 (LISTEN)
     postgres  13254 admin    6u  IPv4 0x35032d9d01cd2647      0t0  TCP localhost:5432 (LISTEN)
-    (venv) $
     ```  
  
     If the output shows postgres has already been installed and is listening on port 5432.  Stop and fix this,  
     otherwise you would install a second postgres instance running on port 5433, and the result would be hours of "port 
-    assignment" mess to clean up. 
+    assignment" mess to clean up.
+
+    ```
+    brew services stop postgresql
+    ```
    
     **If that lsof line returns nothing**, then you don't currently have postgres running, and you can continue on to the next step.
 
@@ -262,23 +269,22 @@ this step.  To see if postgres is already running, check with lsof in a terminal
    
 3. Install PostgreSQL by running the following command:
 
-    `(venv) $ brew install postgresql`
+    `brew install postgresql`
 
 4. Start PostgreSQL (this is actually instructing the macOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
     Postgres every time you start your Mac):
 
-    `(venv) $ brew services start postgresql`
+    `brew services start postgresql`
 
 5. Create a default database, and a default user, and then log into the 'psql postgres' PostgreSQL command interpreter ("postgres=#" is the command prompt, you should not have to type this in):
 
-    _New way: November 2021, using Postgres 14.0_
+    _New way: November 2021, using Postgres 14.0_  TODO 7/8:  CREATE ROLE postgres WITH SUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD ‘stevePG’;
     ```
    (PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % psql postgres
    psql (14.0)
    Type "help" for help.
    
-   postgres=# createdb
-   postgres=# createuser -s postgres    (TODO 7/8:  CREATE ROLE postgres WITH SUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD ‘stevePG’;
+   postgres=# createuser -s postgres;
    postgres=# \du
                                         List of roles
       Role name  |                         Attributes                         | Member of 
