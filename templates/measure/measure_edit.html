@@ -233,8 +233,8 @@
 {% csrf_token %}
   <input type="hidden" name="measure_id" value="{{ measure.id|default_if_none:0|default:0 }}">
   <input type="hidden" name="google_civic_election_id" 
-         value="{{ measure.google_civic_election_id|default_if_none:0|default:0 }}">
-  <input type="hidden" name="state_code" value="{{ measure.state_code|default_if_none:''|default:'' }}">
+         value="{{ google_civic_election_id|default_if_none:0|default:0 }}">
+  <input type="hidden" name="state_code" value="{{ state_code|default_if_none:''|default:'' }}">
   <button type="submit" class="btn btn-danger">Delete Measure</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <label for="confirm_delete_id">
     <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> 
