@@ -59,7 +59,8 @@ def measure_delete_process_view(request):
                              'Unable to delete this Measure. '
                              'Please check the checkbox to confirm you want to delete this measure.')
         return HttpResponseRedirect(reverse('measure:measure_edit', args=(measure_id,)) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+                                    "?google_civic_election_id=" + str(google_civic_election_id)+
+                                    "&state_code=" + str(state_code))
 
     contest_measure_manager = ContestMeasureManager()
     results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id=measure_id)
@@ -74,7 +75,8 @@ def measure_delete_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
                                                           'positions still attached to this measure.')
             return HttpResponseRedirect(reverse('measure:measure_edit', args=(measure_id,)) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id))
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
         else:
             contest_measure.delete()
             messages.add_message(request, messages.INFO, 'Measure deleted.')
