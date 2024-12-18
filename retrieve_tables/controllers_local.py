@@ -13,7 +13,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from retrieve_tables.retrieve_common import allowable_tables
-from wevote_functions.functions import get_voter_api_device_id
+from wevote_functions.functions import get_voter_api_device_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -21,6 +21,11 @@ t0 = 0
 global_stats = {}
 dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'
+AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
+AWS_REGION_NAME = get_environment_variable("AWS_REGION_NAME")
+AWS_STORAGE_BUCKET_NAME = get_environment_variable("AWS_STORAGE_BUCKET_NAME")
+AWS_STORAGE_SERVICE = "s3"
 
 
 def update_fast_load_db(host, voter_api_device_id, table_name, additional_records):
@@ -94,7 +99,8 @@ def retrieve_sql_files_from_master_server(request):
 
             global_stats['table_name_text'] = ('<b>Loading</b>&nbsp;&nbsp;<i>' + table_name +
                                           '</i>&nbsp;&nbsp;from s3 on the <b>local</b> server')
-            restore_one_file_to_local_server(aws_s3_file_url, 'ballot_ballotitem')
+            # restore_one_file_to_local_server(aws_s3_file_url, 'ballot_ballotitem')
+            restore_one_file_to_local_server(aws_s3_file_url, table_name)
             global_stats['step'] += 1
             print(f"{global_stats['count']} -- Restored table {table_name} at {time.time()-t1} seconds")
 
@@ -114,18 +120,28 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         'success': False
     }
 
-    s3 = boto3.client('s3')
+    try:
+        # s3 = boto3.client('s3')
+        session = boto3.session.Session(region_name=AWS_REGION_NAME,
+                                        aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+        s3 = session.resource(AWS_STORAGE_SERVICE)
 
-    AWS_STORAGE_BUCKET_NAME = get_environment_variable("AWS_STORAGE_BUCKET_NAME")
-    head, tail = os.path.split(aws_s3_file_url)
+        head, tail = os.path.split(aws_s3_file_url)
 
-    diff_t0 = time.time() - t0
-    print(f"About to download {table_name} from S3 at {diff_t0:.2f} seconds")
-    tf = tempfile.NamedTemporaryFile(mode='r+b')
-    s3.download_file(AWS_STORAGE_BUCKET_NAME, tail, tf.name)
-    print("Downloaded", tf.name)
-    diff_t0 = time.time() - t0
-    print("Done with download from S3 at {:.6f} seconds".format(diff_t0))
+        diff_t0 = time.time() - t0
+        print(f"About to download {table_name} from S3 at {diff_t0:.2f} seconds")
+        tf = tempfile.NamedTemporaryFile(mode='r+b')
+        print(f"AWS_STORAGE_BUCKET_NAME: {AWS_STORAGE_BUCKET_NAME}, tail: {tail}, tf.name: {tf.name}")
+        s3.Bucket(AWS_STORAGE_BUCKET_NAME).download_file(tail, tf.name)
+        print("Downloaded", tf.name)
+        diff_t0 = time.time() - t0
+        print("Done with download from S3 at {:.6f} seconds".format(diff_t0))
+    except Exception as e:
+        print("!!Problem occurred Downloading file:", e)
+        results['success'] = False,
+        results['error string'] = str(e)
+        return results
 
     try:
         db_name = get_environment_variable("DATABASE_NAME")
@@ -137,13 +153,26 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         diff_t0 = time.time() - t0
         print("About to drop_table {} at {:.6f} seconds".format(table_name, diff_t0))
         engine = connect_to_db()
+    except Exception as e:
+        print("!!Problem occurred connecting to db:", e)
+        results['success'] = False,
+        results['error string'] = str(e)
+        return results
+
+    try:
         drop_table(engine, table_name)
 
         diff_t0 = time.time() - t0
         print("About to pg_restore from tempfile at {:.6f} seconds".format(diff_t0))
 
-        command_str = (f"pg_restore -v --data-only --disable-triggers  -h {db_host} -p {db_port} -U {db_user} "
-                       f"-d {db_name} -t {table_name} tempfile")
+        command_str = f"pg_restore -v --data-only --disable-triggers -U {db_user} "
+        if positive_value_exists(db_host):
+            command_str += f"-h {db_host} "
+        if positive_value_exists(db_port):
+            command_str += f"-p {db_port} "
+        command_str += f"-d {db_name} -t {table_name} "
+        command_str += f"\"{tf.name}\""
+        print(command_str)
 
         os.system(command_str)
 
@@ -151,7 +180,7 @@ def restore_one_file_to_local_server(aws_s3_file_url, table_name):
         print("Restore completed at {:.6f} seconds".format(diff_t0))
         results['success'] = True
     except Exception as e:
-        print("!!Problem occurred!!", e)
+        print("!!Problem occurred 2!!", e)
         results['success'] = False,
         results['error string'] = str(e)
 
@@ -170,13 +199,13 @@ def connect_to_db():
     :return:
     """
     try:
-        connection_string = (
-            f"postgresql+psycopg2://{get_environment_variable('DATABASE_USER')}:"
-            f"{get_environment_variable('DATABASE_PASSWORD')}@"
-            f"{get_environment_variable('DATABASE_HOST')}:"
-            f"{get_environment_variable('DATABASE_PORT')}/"
-            f"{get_environment_variable('DATABASE_NAME')}"
-        )
+        connection_string = f"postgresql+psycopg2://{get_environment_variable('DATABASE_USER')}"
+        if positive_value_exists(get_environment_variable('DATABASE_PASSWORD')):
+            connection_string += f":{get_environment_variable('DATABASE_PASSWORD')}"
+        connection_string += f"@{get_environment_variable('DATABASE_HOST')}"
+        if positive_value_exists(get_environment_variable('DATABASE_PORT')):
+            connection_string += f":{get_environment_variable('DATABASE_PORT')}"
+        connection_string += f"/{get_environment_variable('DATABASE_NAME')}"
         engine = sa.create_engine(connection_string)
         return engine
     except Exception as e:
