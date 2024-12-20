@@ -456,19 +456,22 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
 ## Set up an admin account in your local WeVoteServer database
 
-Now, create an account for yourself to login to the management pages of the WeVoteServer.
-At WeVote, we call end users "voters".  This new "voter" will have all the 
-rights that you (as a developer) need to log in to 
-[http://localhost:8000/admin/](http://localhost:8000/admin/).  Once logged in you can start synchronizing data (downloading ballot and issue 
-data from the master server in the cloud, to your local server).
-    
-   The usage is:  `python manage.py create_dev_user first_name last_name email password`
+1.  Now, create an account for yourself to login to the management pages of the WeVoteServer.
+
+    At WeVote, we call end users "voters".  
+
+    The usage is:  `python manage.py create_dev_user first_name last_name email password`
 
     ```
     (3.11.8) stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python manage.py create_dev_user Samuel Adams samuel@adams.com ale
     Creating developer first name=Samuel, last name=Adams, email=samuel@adams.com, password =ale
     End of create_dev_user
     (3.11.8) stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
+    ```
+    This new "voter" will have all the rights that you (as a developer) need to log in to 
+    [http://localhost:8000/admin/](http://localhost:8000/admin/).  Once logged in you can start synchronizing data (downloading ballot and issue 
+     data from the master server in the cloud, to your local server).
+    
  
 [//]: # (1.  Open the file `WeVoteServer/voter/controllers_voter_create.py` and edit the variables to your own information.)
 [//]: # ()
@@ -491,9 +494,9 @@ data from the master server in the cloud, to your local server).
 [//]: # (    or https://wevotedeveloper.com:8000/voter/create_dev_user Once you have visited)
 [//]: # (    that page, you should have a new admin account you can sign in with.)
 
-5.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password  (for example mine is stevepodell/stevePG.).    
+2.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password.  (in the example above the user email is `samuel@adams.com` and the password is `ale`).    
 
-6.  **Your local instance of the WeVoteServer is now setup and running** (although there is no election 
+3.  **Your local instance of the WeVoteServer is now setup and running** (although there is no election 
     data stored in your Postgres instance, for it to serve to clients at this point).
 
 ## Import some ballot data from the live production API Server
