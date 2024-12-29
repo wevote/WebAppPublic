@@ -8,25 +8,31 @@
 
 <h1>Fast Load Data From We Vote Master Servers</h1>
 <div style="padding: 10px 0 75px 25px; font-size: 18px; display: flex; flex-direction: column;">
-    To load the election data to your local postgres, press the FAST LOAD button below, and in about
-    5 minutes (on a fast Mac), it will have overwritten your local database with all the tables we need for running
+    To load the election data to your local postgres server, press the FAST LOAD button below, and in about
+    20 minutes (on a fast Mac), it will have overwritten your local database with all the tables we need for running
     a local development WeVoteServer server.
-    <br><br>
-    The Python logging screen (and this page!) shows progress as the tables are loaded.
     <br>
+    <span style="font-size: 16px; padding: 15px">
+    Could be improved: The last two files are huge -- candidate_candidatecampain takes about 17% of the time (roughly 3 minutes) and
+    ballot_ballotitem takes about 55% of the time (roughly 9 minutes) and during that time the progress bar only advances
+    about the last 4% of the way.  The progress bar could be improved, and ballot_ballotitem could cleaned out.
+    </span>
+    The Python logging screen (and this page!) shows progress as the tables are loaded.
+    <br><br>
 
-    <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
-    <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
-    <input type="hidden" id="elapsedSeconds" name="started_fast_init" value="0">
+    <input type="hidden" id="started_fast_update"  value="false">
+    <input type="hidden" id="started_fast_init" value="true">
+    <input type="hidden" id="elapsed_seconds"  value="0">
     <div style="display: flex; flex-direction: column; align-self: center; align-items: flex-start; padding-top: 30px; padding-bottom: 30px; width: 80%;">
         <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()" style="width: 100%; align-self: center;">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
         <progress id="progress" value="0" max="100" style="display: none"></progress>
         <div id="table_count" style="padding-top: 10px"></div>
         <div id="current_table"></div>
+        <div id="current_table_wordy"></div>
         <div id="total_time"></div>
         <div id="current_status"></div>
     </div>
-</span>
+</div>
 <br>
 
 <h1>Sync Data With Master We Vote Servers</h1>
@@ -327,7 +333,8 @@ These imports are best run in order from top-to-bottom.
     const table_count = $("#table_count");
     const current_status = $("#current_status");
     const current_table = $("#current_table");
-    const elapsedSeconds = $("#elapsedSeconds");
+    const current_table_wordy = $("#current_table_wordy");
+    const elapsed_seconds = $("#elapsed_seconds");
     const total_time = $("#total_time");
     const startedFastUpdate = $('#started_fast_update');
     const fastInit = $('#started_fast_init');
@@ -340,10 +347,14 @@ These imports are best run in order from top-to-bottom.
     const localOrigin = regex.exec(window.location.href);
     const apiURL = localOrigin[1] + '/retrieve_tables/import/status/?';
 
-    let prevTableName = '';
-    setInterval(function () {
+    updateRealTime();
+
+
+      let prevWordyTableName = '';
+      setInterval(function () {
       if ( startedFastUpdate.val() === 'true') {
         console.log("started fast sync_data cycle " + counter++ + " ---- ", startedFastUpdate.val());
+
 
         $.ajax({
           type: "GET",
@@ -356,9 +367,14 @@ These imports are best run in order from top-to-bottom.
             if (typeof percent === "number") {
               progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(percent);
             }
-            elapsedSeconds.val(data.elapsed);
-            updateDisplayedDuration(data.elapsed);
-            current_table.html(`Current table: ${data.table_name_text}`);
+            if (prevWordyTableName !== data.table_name_text) {
+                elapsed_seconds.val(data.elapsed);
+                prevWordyTableName = data.table_name_text;   // once per file step, unless on the updateRealTime list of huge files
+                updateDisplayedDuration(data.elapsed);
+            }
+
+            current_table_wordy.html(`Current table: ${data.table_name_text}`);
+            current_table.html(data.table_name);
             table_count.text(`Table: ${data.count} of ${data.num_tables}`);
           },
           error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -388,10 +404,12 @@ These imports are best run in order from top-to-bottom.
 
       if (!fastLoadButton.html().includes('.....')) {
         progress.css({'display': 'flex', 'align-self': 'center', 'font-size': '38px'}).val(0);
-        fastLoadButton.html("... Migrating all data from the master server, this takes about 5 minutes ...").css('background-color', '#FFFF00');
+        fastLoadButton.html("... Migrating all data from the master server, this takes about 30 minutes ...").css('background-color', '#FFFF00');
 
         let origin = new URL('{{request.build_absolute_uri}}').origin;
         const apiURL = origin + '/retrieve_tables/import/files/?';
+
+        const t1 = performance.now();
         $.ajax({
           type: "GET",
           url: apiURL,
@@ -400,12 +418,15 @@ These imports are best run in order from top-to-bottom.
           success: function (data) {
             // let status = data.text;
             // console.log(status);
+            const seconds = Math.trunc((performance.now() - t1)/1000);
+            updateDisplayedDuration(seconds);
+            // Elapsed time: 10:33 minutes
             fastLoadButton.html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
             comp = table_count.text().replace('Table: ', '').replace('of', 'out of the');
             compTxt = `Completed loading ${comp} tables in `
             total_time.text(total_time.text().replace('Elapsed time:', compTxt));
             table_count.text("")
-            current_table.text("");
+            current_table_wordy.text("");
             startedFastUpdate.val("false");
             progress.val(100);
             progress.fadeOut(6000);
@@ -419,6 +440,24 @@ These imports are best run in order from top-to-bottom.
          console.log("fastLoadButton clicked while loading");
       }
     }
+
+    function updateRealTime() {
+        let intervalId = setInterval(function () {
+            if (startedFastUpdate.val() === "true") {
+                const tab = current_table.text()
+                if(['ballot_ballotitem', 'ballot_ballotreturned','organization_organization', 'candidate_candidatecampaign'].includes(tab))
+                {
+                    let secs = elapsed_seconds.val() || '0';
+                    secs = parseInt(secs);
+                    secs++;
+                    updateDisplayedDuration(secs);
+                    secs = secs.toString();
+                    elapsed_seconds.val(secs);
+                }
+            }
+        }, 1000);
+    }
+
 </script>
 
 {%  endblock %}

@@ -7,15 +7,15 @@ from config.base import get_environment_variable
 
 # The fast load apis will only return the data from the following tables
 allowable_tables = [
-    'position_positionentered',
-    'campaign_campaignx',
-    'campaign_campaignxowner',
-    'campaign_campaignxpolitician',
-    'campaign_campaignxlistedbyorganization',
-    'campaign_campaignxnewsitem',
+    'position_positionentered',                      # Zero rows on master server Dec 2024
+    'campaign_campaignx',                            # Zero rows on master server Dec 2024
+    'campaign_campaignxowner',                       # 92 rows on master server Dec 2024
+    'campaign_campaignxpolitician',                  # 50 rows on master server Dec 2024
+    'campaign_campaignxlistedbyorganization',        # 1 row on master server Dec 2024
+    'campaign_campaignxnewsitem',                    # Zero rows on master server Dec 2024
     'campaign_campaignxseofriendlypath',
     'campaign_campaignxsupporter',
-    'candidate_candidatesarenotduplicates',
+    'candidate_candidatesarenotduplicates',          # 532 rows on master server Dec 2024
     'candidate_candidatetoofficelink',
     'election_ballotpediaelection',
     'election_election',

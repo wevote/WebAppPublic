@@ -78,7 +78,7 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
 
     <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CustomizePyCharm2021.png"> 
 
-14.  If you are using one of the newer Macs with Apple Silicon processor, he installer offers the "Apple Silicon Version" which is better and more stable -- take it if it is offered!
+14.  If you are using one of the newer Macs with Apple Silicon processor, the installer offers the "Apple Silicon Version" which is better and more stable -- take it if it is offered!
 
 15. If the Apple top menu, shows "Git" skip this step.  If it says "VCS", the follow this step to configure Git
 
@@ -168,7 +168,7 @@ Then confirm that the default python is now version 3.11 or later.
      Python 2.7.18
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % export PATH="/opt/homebrew/opt/python@3.11/libexec/bin:$PATH"
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version                                            
-     Python 3.11.4
+     Python 3.13.1
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
      ```
 
@@ -452,40 +452,51 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     Python print commands, only send their output to this log.  Python logger commands send the output
     to both this runtime log, and the log file that we created a few steps back.  On the production servers in AWS, these 
-    log lines can be searched using Splunk (ask Dale for Splunk access if you could use it.)
+    log lines can be searched using the AWS CloudWatch console (ask Dale for CloundWatch access if you need it.)
 
 ## Set up an admin account in your local WeVoteServer database
 
-Now, create an account for yourself to login to the management pages of the WeVoteServer.
-At WeVote, we call end users "voters".  This new "voter" will have all the 
-rights that you (as a developer) need to log in to 
-[http://localhost:8000/admin/](http://localhost:8000/admin/).  Once logged in you can start synchronizing data (downloading ballot and issue 
-data from the master server in the cloud, to your local server).
+1.  Now, create an account for yourself to login to the management pages of the WeVoteServer.
+
+    At WeVote, we call end users "voters".  
+
+    The usage is:  `python manage.py create_dev_user first_name last_name email password`
+
+    ```
+    (3.11.8) stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python manage.py create_dev_user Samuel Adams samuel@adams.com ale
+    Creating developer first name=Samuel, last name=Adams, email=samuel@adams.com, password =ale
+    End of create_dev_user
+    (3.11.8) stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
+    ```
+    This new "voter" will have all the rights that you (as a developer) need to log in to 
+    [http://localhost:8000/admin/](http://localhost:8000/admin/).  Once logged in you can start synchronizing data (downloading ballot and issue 
+     data from the master server in the cloud, to your local server).
     
-1.  Open the file `WeVoteServer/voter/controllers_voter_create.py` and edit the variables to your own information.
+ 
+[//]: # (1.  Open the file `WeVoteServer/voter/controllers_voter_create.py` and edit the variables to your own information.)
+[//]: # ()
+[//]: # (2.  Edit the default information in this file &#40;first_name, last_name, etc.&#41; to be personalized for yourself, with your own information:)
+[//]: # ()
+[//]: # (```)
+[//]: # (first_name = "Samuel")
+[//]: # (last_name = "Adams")
+[//]: # (email = "samuel@adams.com")
+[//]: # (password = "GoodAle1776")
+[//]: # (```)
+[//]: # ()
+[//]: # (3.  Set `allow_create` to True, so when you run the script, changes can be made to your local database.)
+[//]: # ()
+[//]: # (```)
+[//]: # (allow_create = True)
+[//]: # (```)
+[//]: # ()
+[//]: # (4.  Visit http://localhost:8000/voter/create_dev_user )
+[//]: # (    or https://wevotedeveloper.com:8000/voter/create_dev_user Once you have visited)
+[//]: # (    that page, you should have a new admin account you can sign in with.)
 
-2.  Edit the default information in this file (first_name, last_name, etc.) to be personalized for yourself, with your own information:
+2.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password.  (in the example above the user email is `samuel@adams.com` and the password is `ale`).    
 
-```
-first_name = "Samuel"
-last_name = "Adams"
-email = "samuel@adams.com"
-password = "GoodAle1776"
-```
-
-3.  Set `allow_create` to True, so when you run the script, changes can be made to your local database.
-
-```
-allow_create = True
-```
-
-4.  Visit http://localhost:8000/voter/create_dev_user 
-    or https://wevotedeveloper.com:8000/voter/create_dev_user Once you have visited
-    that page, you should have a new admin account you can sign in with.
-
-5.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new username/password  (for example mine is stevepodell/stevePG.).    
-
-6.  **Your local instance of the WeVoteServer is now setup and running** (although there is no election 
+3.  **Your local instance of the WeVoteServer is now setup and running** (although there is no election 
     data stored in your Postgres instance, for it to serve to clients at this point).
 
 ## Import some ballot data from the live production API Server

@@ -732,7 +732,7 @@ class VoterManager(BaseUserManager):
 
         queryset = Voter.objects.filter(email=email)
         voter_list = queryset.all()
-        if len(voter_list) > 0:
+        if voter_list.count() > 0:
             try:
                 voter = voter_list[0]
                 voter.set_password(password)
