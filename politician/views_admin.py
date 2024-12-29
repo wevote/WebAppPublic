@@ -562,6 +562,9 @@ def politicians_import_from_master_server_view(request):
 
 @login_required
 def politician_list_view(request):
+    # Pagination parameters
+    page = int(request.GET.get('page', 0))  # Default to page 0
+    items_per_page = 25  # Number of items per page
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -1166,7 +1169,34 @@ def politician_list_view(request):
             show_related_candidates=show_related_candidates,
             was_candidate_recently=was_candidate_recently,
             )
+        
+    # Pagination logic
+    total_count = politician_query.count()
+    items_per_page = 25
+    page = int(request.GET.get("page", 1)) - 1  # Page is 0-indexed
+    start_index = page * items_per_page
+    end_index = start_index + items_per_page
+
+    # Fetch only the items for the current page
+    politician_list = politician_query.order_by("politician_name")[start_index:end_index]
+
+    # Determine if there are previous/next pages
+    has_previous_page = page > 0
+    has_next_page = end_index < total_count
+
+    # Update URLs for previous and next pages
+    previous_page_url = f"?page={page}&state_code={state_code}&politician_search={politician_search}" if has_previous_page else None
+    next_page_url = f"?page={page + 2}&state_code={state_code}&politician_search={politician_search}" if has_next_page else None
+    
     template_values = {
+        "start_index": start_index,
+        'politician_list': politician_list,
+        'state_code': state_code,
+        'politician_search': politician_search,
+        'current_page_number': page,
+        'previous_page_url': previous_page_url,
+        'next_page_url': next_page_url,
+        'hide_pagination': total_count <= items_per_page,
         'checkbox_url_variables':       checkbox_url_variables,
         'election_list':                election_list,
         'exclude_politician_analysis_done': exclude_politician_analysis_done,
