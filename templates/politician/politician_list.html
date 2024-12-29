@@ -51,6 +51,9 @@
 
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}
+    <input type="hidden" name="politician_search" value="{{ politician_search|default_if_none:'' }}" />
+    <input type="hidden" name="show_all" value="{{ show_all|default_if_none:0 }}" />
+    <input type="hidden" name="exclude_politician_analysis_done" value="{{ exclude_politician_analysis_done|default_if_none:0 }}" />
 
     {% if state_code != "" %}
     <a href="#" onclick="showAllStates(); return false;">
@@ -58,15 +61,14 @@
     {% endif %}
 
     {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
+    <select id="state_code_id" name="state_code" onchange="this.form.submit()">
+        <option value="" {% if not state_code %}selected{% endif %}>-- Select a State --</option>
         {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
+        <option value="{{ key }}" {% if key|lower == state_code|lower %}selected{% endif %}>
+            {{ state }}
+        </option>
         {% endfor %}
-        </select>
+    </select>
     {% endif %}{# End of if state_list #}
 
     {% if politician_search %}
@@ -125,11 +127,11 @@
 {% if not hide_pagination %}
 <span class="float-right">
     {% if previous_page_url %}
-        <a href="{{ previous_page_url }}">Previous page</a> |
+    <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a> |
     {% endif %}
     Page {{ current_page_number|add:1 }}
     {% if next_page_url %}
-        | <a href="{{ next_page_url }}">Next page</a>
+        | <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>
     {% endif %}
 </span>
 {% endif %}
@@ -264,11 +266,11 @@
 {% if not hide_pagination %}
 <span class="float-right">
     {% if previous_page_url %}
-        <a href="{{ previous_page_url }}">Previous page</a> |
+    <a href="{{ previous_page_url }}" onclick="displayLoadingBanner()">Previous page</a>
     {% endif %}
     Page {{ current_page_number|add:1 }}
     {% if next_page_url %}
-        | <a href="{{ next_page_url }}">Next page</a>
+        | <a href="{{ next_page_url }}" onclick="displayLoadingBanner()">Next page</a>
     {% endif %}
 </span>
 {% endif %}
@@ -283,7 +285,12 @@
 
 <script>
     function displayLoadingBanner() {
-        $('#FilterPopupMessage').show();
+        const banner = document.getElementById('FilterPopupMessage');
+        if (banner) {
+            banner.style.display = 'block';
+        } else {
+            console.error('FilterPopupMessage element not found.');
+        }
     }
 
     function clearSearch() {
@@ -360,5 +367,6 @@
     });
 
 </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 {% endblock %}
